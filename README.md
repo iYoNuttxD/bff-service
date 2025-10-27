@@ -37,6 +37,7 @@ Desenvolvido por: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
 
 ## 🏗️ Arquitetura
 
+```
 ┌──────────────┐
 │  Frontend    │
 └──────┬───────┘
@@ -53,11 +54,13 @@ Desenvolvido por: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
 │(Azure  │ │(MongoDB│ │(HTTP Trigger│
 │  SQL)  │ │ Atlas) │ │   Events)   │
 └────────┘ └────────┘ └─────────────┘
+```
 
 ---
 
 ## 📂 Estrutura do Projeto
 
+```
 bff-service/
 ├── src/
 │   ├── config/
@@ -88,6 +91,7 @@ bff-service/
 ├── docker-compose.yml
 ├── openapi.yaml
 └── README.md
+```
 
 ---
 
@@ -97,55 +101,60 @@ bff-service/
 
 - Node.js 18+
 - Docker (opcional)
-- Delivery Service rodando (porta 3001)
-- Orders Service rodando (porta 3002)
-
----
+- Delivery Service rodando (porta 8082)
+- Orders Service rodando (porta 8081)
 
 ### 1. Clonar Repositório
 
+```bash
 git clone https://github.com/iYoNuttxD/bff-service.git
 cd bff-service
-
----
+```
 
 ### 2. Instalar Dependências
 
+```bash
 npm install
-
----
+```
 
 ### 3. Configurar Variáveis de Ambiente
 
+```bash
 cp .env.example .env
+```
 
-Edite o arquivo .env:
+Edite o arquivo `.env`:
 
+```env
 NODE_ENV=development
 PORT=3000
 
-DELIVERY_SERVICE_URL=http://localhost:3001
-ORDERS_SERVICE_URL=http://localhost:3002
+# Microservices
+DELIVERY_SERVICE_URL=http://localhost:8082
+ORDERS_SERVICE_URL=http://localhost:8081
 
-FUNCTION_CREATE_URL=https://your-function-app.azurewebsites.net/api/CreateFunction
-FUNCTION_GET_URL=https://your-function-app.azurewebsites.net/api/GetFunction
+# Azure Functions
+FUNCTION_CREATE_URL=https://erp-events-functions.azurewebsites.net/api/CreateEvent
+FUNCTION_GET_URL=https://erp-events-functions.azurewebsites.net/api/GetData
 
+# Configuration
 SERVICE_TIMEOUT=30000
 LOG_LEVEL=info
-
----
+```
 
 ### 4. Executar em Desenvolvimento
 
+```bash
 npm run dev
+```
 
-Servidor disponível em: http://localhost:3000
-
----
+Servidor disponível em: **http://localhost:3000**
 
 ### 5. Executar em Produção
 
+```bash
 npm start
+```
 
 ---
 
@@ -153,19 +162,27 @@ npm start
 
 ### Build da imagem
 
-docker build -t bff-service:latest .
+```bash
+docker build -t iyonuttxd/bff-service:latest .
+```
 
 ### Executar container
 
-docker run -p 3000:3000 --env-file .env bff-service:latest
+```bash
+docker run -p 3000:3000 --env-file .env iyonuttxd/bff-service:latest
+```
 
 ### Docker Compose
 
+```bash
 docker-compose up
+```
 
 ### Docker Compose com todos os serviços
 
+```bash
 docker-compose --profile full-stack up
+```
 
 ---
 
@@ -173,7 +190,9 @@ docker-compose --profile full-stack up
 
 ### Health Check
 
-GET /api/v1/health
+```http
+GET /api/health
+```
 
 Retorna o status do BFF.
 
@@ -182,22 +201,46 @@ Retorna o status do BFF.
 ### Agregação de Dados
 
 #### Dashboard Agregado
-GET /api/v1/aggregation/dashboard
+```http
+GET /api/dashboard
+```
 
 Retorna dados agregados de Orders Service, Delivery Service e Azure Function.
 
+**Resposta:**
+```json
+{
+  "success": true,
+  "data": {
+    "orders": {
+      "total": 10,
+      "pending": 3,
+      "delivered": 7
+    },
+    "deliveries": {
+      "total": 15,
+      "active": 5,
+      "completed": 10
+    },
+    "events": {
+      "total": 50,
+      "recent": [...]
+    }
+  }
+}
+```
+
 #### Pedido Completo com Entrega
-GET /api/v1/aggregation/pedido-completo/:pedidoId
+```http
+GET /api/aggregation/pedido-completo/:pedidoId
+```
 
 Combina dados do pedido (Orders) com dados da entrega (Delivery).
 
-#### Dados Completos
-GET /api/v1/aggregation/dados-completos
-
-Retorna dados de microservices + Azure Function.
-
 #### Health Check de Todos os Serviços
-GET /api/v1/aggregation/health
+```http
+GET /api/aggregation/health
+```
 
 Verifica o status de BFF, Delivery Service e Orders Service.
 
@@ -206,10 +249,13 @@ Verifica o status de BFF, Delivery Service e Orders Service.
 ### Eventos (Azure Functions)
 
 #### Criar via Evento
-POST /api/v1/events/create
+```http
+POST /api/events
 Content-Type: application/json
+```
 
-Body:
+**Body:**
+```json
 {
   "type": "PEDIDO_CRIADO",
   "data": {
@@ -218,91 +264,114 @@ Body:
     "valor": 100.00
   }
 }
+```
 
-Envia evento para Azure Function via HTTP Trigger.
-A Function persiste os dados no banco.
+Envia evento para Azure Function via HTTP Trigger.  
+A Function persiste os dados no MongoDB Atlas.
 
 #### Buscar Dados da Function
-GET /api/v1/events/data
-GET /api/v1/events/data/:id
+```http
+GET /api/events
+GET /api/events/:id
+```
 
 ---
 
 ### Proxy - Delivery Service
 
 #### Entregadores
-GET    /api/v1/delivery/entregadores
-GET    /api/v1/delivery/entregadores/:id
-POST   /api/v1/delivery/entregadores
-PUT    /api/v1/delivery/entregadores/:id
-DELETE /api/v1/delivery/entregadores/:id
+```http
+GET    /api/delivery/entregadores
+GET    /api/delivery/entregadores/:id
+POST   /api/delivery/entregadores
+PUT    /api/delivery/entregadores/:id
+DELETE /api/delivery/entregadores/:id
+```
 
 #### Veículos
-GET    /api/v1/delivery/veiculos
-GET    /api/v1/delivery/veiculos/:id
-POST   /api/v1/delivery/veiculos
-PUT    /api/v1/delivery/veiculos/:id
-DELETE /api/v1/delivery/veiculos/:id
+```http
+GET    /api/delivery/veiculos
+GET    /api/delivery/veiculos/:id
+POST   /api/delivery/veiculos
+PUT    /api/delivery/veiculos/:id
+DELETE /api/delivery/veiculos/:id
+```
 
 #### Aluguéis
-GET    /api/v1/delivery/alugueis
-GET    /api/v1/delivery/alugueis/:id
-POST   /api/v1/delivery/alugueis
-PATCH  /api/v1/delivery/alugueis/:id/finalizar
-PATCH  /api/v1/delivery/alugueis/:id/cancelar
+```http
+GET    /api/delivery/alugueis
+GET    /api/delivery/alugueis/:id
+POST   /api/delivery/alugueis
+PATCH  /api/delivery/alugueis/:id/finalizar
+PATCH  /api/delivery/alugueis/:id/cancelar
+```
 
 #### Entregas
-GET    /api/v1/delivery/entregas
-GET    /api/v1/delivery/entregas/:id
-POST   /api/v1/delivery/entregas
-PATCH  /api/v1/delivery/entregas/:id/status
+```http
+GET    /api/delivery/entregas
+GET    /api/delivery/entregas/:id
+POST   /api/delivery/entregas
+PATCH  /api/delivery/entregas/:id/status
+```
 
 ---
 
 ### Proxy - Orders Service
 
 #### Clientes
-GET    /api/v1/orders/clientes
-GET    /api/v1/orders/clientes/:id
-POST   /api/v1/orders/clientes
-PUT    /api/v1/orders/clientes/:id
-DELETE /api/v1/orders/clientes/:id
+```http
+GET    /api/orders/clientes
+GET    /api/orders/clientes/:id
+POST   /api/orders/clientes
+PUT    /api/orders/clientes/:id
+DELETE /api/orders/clientes/:id
+```
 
 #### Restaurantes
-GET    /api/v1/orders/restaurantes
-GET    /api/v1/orders/restaurantes/:id
-POST   /api/v1/orders/restaurantes
-PUT    /api/v1/orders/restaurantes/:id
-DELETE /api/v1/orders/restaurantes/:id
+```http
+GET    /api/orders/restaurantes
+GET    /api/orders/restaurantes/:id
+POST   /api/orders/restaurantes
+PUT    /api/orders/restaurantes/:id
+DELETE /api/orders/restaurantes/:id
+```
 
 #### Cardápios
-GET    /api/v1/orders/cardapios
-GET    /api/v1/orders/cardapios/:id
-POST   /api/v1/orders/cardapios
-PUT    /api/v1/orders/cardapios/:id
-DELETE /api/v1/orders/cardapios/:id
+```http
+GET    /api/orders/cardapios
+GET    /api/orders/cardapios/:id
+POST   /api/orders/cardapios
+PUT    /api/orders/cardapios/:id
+DELETE /api/orders/cardapios/:id
+```
 
 #### Pedidos
-GET    /api/v1/orders/pedidos
-GET    /api/v1/orders/pedidos/:id
-POST   /api/v1/orders/pedidos
-PATCH  /api/v1/orders/pedidos/:id/status
-PATCH  /api/v1/orders/pedidos/:id/cancelar
+```http
+GET    /api/orders/pedidos
+GET    /api/orders/pedidos/:id
+POST   /api/orders/pedidos
+PATCH  /api/orders/pedidos/:id/status
+PATCH  /api/orders/pedidos/:id/cancelar
+```
 
 #### Avaliações
-GET    /api/v1/orders/avaliacoes
-GET    /api/v1/orders/avaliacoes/:id
-POST   /api/v1/orders/avaliacoes
-PUT    /api/v1/orders/avaliacoes/:id
-DELETE /api/v1/orders/avaliacoes/:id
+```http
+GET    /api/orders/avaliacoes
+GET    /api/orders/avaliacoes/:id
+POST   /api/orders/avaliacoes
+PUT    /api/orders/avaliacoes/:id
+DELETE /api/orders/avaliacoes/:id
+```
 
 #### Pagamentos
-GET    /api/v1/orders/pagamentos
-GET    /api/v1/orders/pagamentos/:id
-POST   /api/v1/orders/pagamentos
-PATCH  /api/v1/orders/pagamentos/:id/status
-PATCH  /api/v1/orders/pagamentos/:id/processar
-PATCH  /api/v1/orders/pagamentos/:id/cancelar
+```http
+GET    /api/orders/pagamentos
+GET    /api/orders/pagamentos/:id
+POST   /api/orders/pagamentos
+PATCH  /api/orders/pagamentos/:id/status
+PATCH  /api/orders/pagamentos/:id/processar
+PATCH  /api/orders/pagamentos/:id/cancelar
+```
 
 ---
 
@@ -310,20 +379,36 @@ PATCH  /api/v1/orders/pagamentos/:id/cancelar
 
 ### Verificar Health
 
-curl http://localhost:3000/api/v1/health
+```bash
+curl http://localhost:3000/api/health
+```
 
 ### Testar Agregação
 
-curl http://localhost:3000/api/v1/aggregation/health
-curl http://localhost:3000/api/v1/aggregation/dashboard
+```bash
+curl http://localhost:3000/api/dashboard
+curl http://localhost:3000/api/aggregation/health
+```
 
 ### Testar Proxy Delivery
 
-curl http://localhost:3000/api/v1/delivery/entregadores
+```bash
+curl http://localhost:3000/api/delivery/entregadores
+```
 
 ### Testar Proxy Orders
 
-curl http://localhost:3000/api/v1/orders/clientes
+```bash
+curl http://localhost:3000/api/orders/clientes
+```
+
+### Criar Evento
+
+```bash
+curl -X POST http://localhost:3000/api/events \
+  -H "Content-Type: application/json" \
+  -d '{"type":"PEDIDO_CRIADO","data":{"pedidoId":"123","valor":100}}'
+```
 
 ---
 
@@ -331,27 +416,47 @@ curl http://localhost:3000/api/v1/orders/clientes
 
 ### Pull da imagem
 
+```bash
 docker pull iyonuttxd/bff-service:latest
+```
 
 ### Executar
 
+```bash
 docker run -p 3000:3000 \
-  -e DELIVERY_SERVICE_URL=http://delivery-service:3001 \
-  -e ORDERS_SERVICE_URL=http://orders-service:3002 \
+  -e DELIVERY_SERVICE_URL=http://delivery-service:8082 \
+  -e ORDERS_SERVICE_URL=http://orders-service:8081 \
+  -e FUNCTION_CREATE_URL=https://erp-events-functions.azurewebsites.net/api/CreateEvent \
+  -e FUNCTION_GET_URL=https://erp-events-functions.azurewebsites.net/api/GetData \
   iyonuttxd/bff-service:latest
+```
 
 ---
 
 ## 🔗 Repositórios Relacionados
 
+- **MicroFrontEnd**: https://github.com/iYoNuttxD/microfrontend-erp
 - **Delivery Service**: https://github.com/iYoNuttxD/delivery-service-microservice
 - **Orders Service**: https://github.com/iYoNuttxD/orders-service-microservice
+- **Azure Functions**: https://github.com/iYoNuttxD/azure-functions-v4
 
 ---
 
 ## 📚 Documentação
 
-- **OpenAPI Spec**: openapi.yaml
+- **OpenAPI Spec**: `openapi.yaml`
+- **Swagger UI**: http://localhost:3000/api-docs (quando disponível)
+
+---
+
+## 🎯 Padrões Implementados
+
+- ✅ **BFF Pattern** (Backend For Frontend)
+- ✅ **API Gateway Pattern** (Proxy)
+- ✅ **Aggregation Pattern** (Combinar dados)
+- ✅ **Event Sourcing** (Via Azure Functions)
+- ✅ **Health Check Pattern**
+- ✅ **Circuit Breaker** (Timeout handling)
 
 ---
 
@@ -372,7 +477,7 @@ MIT License - veja LICENSE para mais detalhes.
 
 ## 📅 Versão
 
-**v1.0.0** - 26/10/2025
+**v1.0.0** - 27/10/2025
 
 ---
 
