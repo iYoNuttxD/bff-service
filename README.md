@@ -30,7 +30,6 @@ O serviço BFF atua como a principal fachada da plataforma ClickDelivery, orques
 ✅ **Compatível com Docker** - Container com health check  
 ✅ **CI/CD** - Pipeline automatizado de testes e publicação Docker
 ✅ **Docker Hub** - Imagem oficial no Docker Hub [https://hub.docker.com/r/iyonuttxd/bff-service](https://hub.docker.com/r/iyonuttxd/bff-service)
-
 ---
 
 ## 🏗️ Arquitetura
