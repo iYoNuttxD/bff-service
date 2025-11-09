@@ -1,23 +1,27 @@
 openapi: 3.0.3
 info:
-  title: BFF Service API
+  title: BFF Service API - ClickDelivery Platform
   description: |
-    **Backend For Frontend (BFF) - Agregação e Proxy**
+    **Backend For Frontend (BFF)** - Unified API Gateway for ClickDelivery Platform
     
-    O BFF atua como intermediário entre o frontend e os microservices:
-    - 🚚 **Delivery Service** (Azure SQL Server)
-    - 📦 **Orders Service** (MongoDB Atlas)
-    - ⚡ **Azure Functions** (HTTP Triggers)
+    The BFF acts as the main facade between frontend and all microservices:
+    - 👤 **User Service** - User management and authentication
+    - 📦 **Orders Service** - Order management, restaurants, menus
+    - 🚚 **Delivery Service** - Delivery tracking and management
+    - 🚗 **Rental Service** - Vehicle rental management
+    - 🔔 **Notification Service** - Notifications and alerts
+    - 📊 **Report Service** - Analytics and reporting
     
-    ### Funcionalidades:
-    - ✅ Agregação de dados de múltiplos serviços
-    - ✅ Proxy CRUD para todos os domínios
-    - ✅ Integração com Azure Functions
-    - ✅ CREATE via eventos
-    - ✅ Health check de todos os serviços
+    ### Features:
+    - ✅ Data aggregation from multiple services
+    - ✅ JWT authentication (Auth0)
+    - ✅ Request proxying with header propagation
+    - ✅ Consolidated health checks
+    - ✅ Response caching
+    - ✅ Correlation ID tracking
     
-    Desenvolvido por: **iYoNuttxD**
-  version: 1.0.0
+    Developed by: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
+  version: 2.0.0
   contact:
     name: iYoNuttxD
     url: https://github.com/iYoNuttxD
@@ -27,139 +31,201 @@ info:
 
 servers:
   - url: http://localhost:3000/api/v1
-    description: Servidor de Desenvolvimento Local
+    description: Local Development
   - url: https://bff-service.azurewebsites.net/api/v1
-    description: Servidor de Produção (Azure)
+    description: Production (Azure)
 
 tags:
   - name: Health
-    description: Status do BFF e serviços conectados
-  - name: Aggregation
-    description: Endpoints de agregação de dados
-  - name: Events
-    description: Integração com Azure Functions
-  - name: Delivery
-    description: Proxy para Delivery Service
+    description: Health checks for BFF and all services
+  - name: Dashboard
+    description: Aggregated data endpoints
+  - name: Users
+    description: User management proxy
   - name: Orders
-    description: Proxy para Orders Service
+    description: Orders service proxy
+  - name: Deliveries
+    description: Delivery service proxy
+  - name: Rentals
+    description: Rental service proxy
+  - name: Notifications
+    description: Notification service proxy
+  - name: Reports
+    description: Report service proxy
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Auth0
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        service:
+          type: string
+          example: bff-service
+        status:
+          type: string
+          enum: [ok, degraded, error]
+        dependencies:
+          type: object
+          properties:
+            userService:
+              $ref: '#/components/schemas/ServiceStatus'
+            ordersService:
+              $ref: '#/components/schemas/ServiceStatus'
+            deliveryService:
+              $ref: '#/components/schemas/ServiceStatus'
+            rentalService:
+              $ref: '#/components/schemas/ServiceStatus'
+            notificationService:
+              $ref: '#/components/schemas/ServiceStatus'
+            reportService:
+              $ref: '#/components/schemas/ServiceStatus'
+        timestamp:
+          type: string
+          format: date-time
+
+    ServiceStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [up, down]
+        error:
+          type: string
+
+    DashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            user:
+              type: object
+            orders:
+              type: object
+            deliveries:
+              type: object
+            rentals:
+              type: object
+            notifications:
+              type: object
+            reports:
+              type: object
+            status:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        correlationId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
 
 paths:
-  # ==================== HEALTH ====================
+  /:
+    get:
+      tags:
+        - Health
+      summary: Service Information
+      description: Returns information about the BFF service and available endpoints
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  version:
+                    type: string
+                  description:
+                    type: string
+                  author:
+                    type: string
+                  endpoints:
+                    type: object
+                  microservices:
+                    type: object
+
   /health:
     get:
       tags:
         - Health
-      summary: Health check do BFF
-      description: Verifica se o BFF está operacional
+      summary: Consolidated Health Check
+      description: Returns health status of BFF and all integrated microservices
       responses:
         '200':
-          description: BFF operacional
+          description: Health status retrieved successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: UP
-                  timestamp:
-                    type: string
-                    format: date-time
-                  service:
-                    type: string
-                    example: BFF Service
-                  version:
-                    type: string
-                    example: 1.0.0
-
-  # ==================== AGGREGATION ====================
-  /aggregation/health:
-    get:
-      tags:
-        - Aggregation
-      summary: Health check de todos os serviços
-      description: Verifica o status do BFF, Delivery Service e Orders Service
-      responses:
-        '200':
-          description: Status de todos os serviços
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  services:
-                    type: object
-                    properties:
-                      bff:
-                        type: object
-                        properties:
-                          status:
-                            type: string
-                            example: UP
-                          timestamp:
-                            type: string
-                      orders:
-                        type: object
-                        properties:
-                          status:
-                            type: string
-                            example: UP
-                          data:
-                            type: object
-                      delivery:
-                        type: object
-                        properties:
-                          status:
-                            type: string
-                            example: UP
-                          data:
-                            type: object
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /aggregation/dashboard:
+  /dashboard/overview:
     get:
       tags:
-        - Aggregation
-      summary: Dashboard com dados agregados
-      description: Retorna dados agregados de Orders Service, Delivery Service e Azure Function
+        - Dashboard
+      summary: Dashboard Overview
+      description: Returns aggregated dashboard data from all microservices
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Dados agregados
+          description: Dashboard data retrieved successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  timestamp:
-                    type: string
-                  data:
-                    type: object
-                    properties:
-                      orders:
-                        type: object
-                      delivery:
-                        type: object
-                      function:
-                        type: object
+                $ref: '#/components/schemas/DashboardResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /aggregation/pedido-completo/{pedidoId}:
+  /me/summary:
     get:
       tags:
-        - Aggregation
-      summary: Buscar pedido completo com entrega
-      description: Agrega dados do pedido (Orders) com dados da entrega (Delivery)
-      parameters:
-        - name: pedidoId
-          in: path
-          required: true
-          schema:
-            type: string
+        - Dashboard
+      summary: User Summary
+      description: Returns aggregated user summary with counters from all services
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Pedido completo
+          description: User summary retrieved successfully
           content:
             application/json:
               schema:
@@ -170,80 +236,77 @@ paths:
                   data:
                     type: object
                     properties:
-                      pedido:
+                      profile:
                         type: object
-                      entregas:
-                        type: array
-                        items:
-                          type: object
+                      counters:
+                        type: object
+                      status:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /aggregation/dados-completos:
+  /users:
     get:
       tags:
-        - Aggregation
-      summary: Buscar dados completos de microservices + function
-      description: Retorna pedidos, entregas e dados da Azure Function
+        - Users
+      summary: List Users
+      description: Proxies request to User Service
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Dados completos agregados
+          description: Users retrieved successfully
+        '401':
+          description: Unauthorized
 
-  # ==================== EVENTS (AZURE FUNCTIONS) ====================
-  /events/create:
     post:
       tags:
-        - Events
-      summary: Criar via evento (Azure Function)
-      description: |
-        Envia dados para Azure Function via HTTP Trigger.
-        A Function recebe o evento e persiste no banco de dados.
+        - Users
+      summary: Create User
+      description: Proxies request to User Service
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - type
-                - data
-              properties:
-                type:
-                  type: string
-                  example: "PEDIDO_CRIADO"
-                data:
-                  type: object
-                  example:
-                    pedidoId: "123"
-                    clienteId: "456"
       responses:
         '201':
-          description: Evento enviado com sucesso
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  data:
-                    type: object
+          description: User created successfully
+        '401':
+          description: Unauthorized
 
-  /events/data:
+  /users/me:
     get:
       tags:
-        - Events
-      summary: Buscar dados da Azure Function
-      description: Busca dados processados pela Azure Function
+        - Users
+      summary: Get Current User Profile
+      description: Proxies request to User Service
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Dados da function
+          description: User profile retrieved successfully
+        '401':
+          description: Unauthorized
 
-  /events/data/{id}:
+  /users/{id}:
     get:
       tags:
-        - Events
-      summary: Buscar dados por ID da Azure Function
+        - Users
+      summary: Get User by ID
+      description: Proxies request to User Service
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -252,21 +315,88 @@ paths:
             type: string
       responses:
         '200':
-          description: Dados encontrados
+          description: User retrieved successfully
+        '404':
+          description: User not found
 
-  # ==================== DELIVERY SERVICE PROXY ====================
-  /delivery/entregadores:
-    get:
+    put:
       tags:
-        - Delivery
-      summary: Listar entregadores (Proxy)
+        - Users
+      summary: Update User
+      description: Proxies request to User Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         '200':
-          description: Lista de entregadores
+          description: User updated successfully
+
+    delete:
+      tags:
+        - Users
+      summary: Delete User
+      description: Proxies request to User Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted successfully
+
+  /orders/{proxy+}:
+    get:
+      tags:
+        - Orders
+      summary: Proxy to Orders Service
+      description: |
+        Forwards all requests to Orders Service. Available endpoints:
+        - /pedidos - Orders
+        - /clientes - Customers
+        - /restaurantes - Restaurants
+        - /cardapios - Menus
+        - /avaliacoes - Reviews
+        - /pagamentos - Payments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Orders Service path
+      responses:
+        '200':
+          description: Request forwarded successfully
+
     post:
       tags:
-        - Delivery
-      summary: Criar entregador (Proxy)
+        - Orders
+      summary: Proxy POST to Orders Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -275,101 +405,86 @@ paths:
               type: object
       responses:
         '201':
-          description: Entregador criado
+          description: Resource created successfully
 
-  /delivery/veiculos:
+  /deliveries/{proxy+}:
     get:
       tags:
-        - Delivery
-      summary: Listar veículos (Proxy)
+        - Deliveries
+      summary: Proxy to Delivery Service
+      description: |
+        Forwards all requests to Delivery Service. Available endpoints:
+        - /entregas - Deliveries
+        - /entregadores - Delivery persons
+        - /veiculos - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Lista de veículos
-    post:
-      tags:
-        - Delivery
-      summary: Criar veículo (Proxy)
-      responses:
-        '201':
-          description: Veículo criado
+          description: Request forwarded successfully
 
-  /delivery/entregas:
+  /rentals/{proxy+}:
     get:
       tags:
-        - Delivery
-      summary: Listar entregas (Proxy)
+        - Rentals
+      summary: Proxy to Rental Service
+      description: |
+        Forwards all requests to Rental Service. Available endpoints:
+        - /alugueis - Rentals
+        - /veiculos - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Lista de entregas
-    post:
-      tags:
-        - Delivery
-      summary: Criar entrega (Proxy)
-      responses:
-        '201':
-          description: Entrega criada
+          description: Request forwarded successfully
 
-  # ==================== ORDERS SERVICE PROXY ====================
-  /orders/clientes:
+  /notifications/{proxy+}:
     get:
       tags:
-        - Orders
-      summary: Listar clientes (Proxy)
+        - Notifications
+      summary: Proxy to Notification Service
+      description: Forwards all requests to Notification Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Lista de clientes
-    post:
-      tags:
-        - Orders
-      summary: Criar cliente (Proxy)
-      responses:
-        '201':
-          description: Cliente criado
+          description: Request forwarded successfully
 
-  /orders/restaurantes:
+  /reports/{proxy+}:
     get:
       tags:
-        - Orders
-      summary: Listar restaurantes (Proxy)
+        - Reports
+      summary: Proxy to Report Service
+      description: |
+        Forwards all requests to Report Service. Available endpoints:
+        - /reports - Reports
+        - /metrics - Metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Lista de restaurantes
-    post:
-      tags:
-        - Orders
-      summary: Criar restaurante (Proxy)
-      responses:
-        '201':
-          description: Restaurante criado
-
-  /orders/pedidos:
-    get:
-      tags:
-        - Orders
-      summary: Listar pedidos (Proxy)
-      responses:
-        '200':
-          description: Lista de pedidos
-    post:
-      tags:
-        - Orders
-      summary: Criar pedido (Proxy)
-      responses:
-        '201':
-          description: Pedido criado
-
-components:
-  schemas:
-    Error:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            message:
-              type: string
-            statusCode:
-              type: integer
+          description: Request forwarded successfully

@@ -1,156 +1,144 @@
-# 🔄 BFF Service - Backend For Frontend
+# 🔄 BFF Service - ClickDelivery Platform
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)
 ![Express](https://img.shields.io/badge/Express-4.18-blue.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**Backend For Frontend (BFF)** - Camada de agregação e proxy entre frontend e microservices.
+**Backend For Frontend (BFF)** - Unified API gateway and aggregation layer for the ClickDelivery platform, providing a single, stable interface between the frontend and all microservices.
 
 Desenvolvido por: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
 
 ---
 
-## 🎯 Funcionalidades
+## 🎯 Overview
 
-✅ **Agregação de Dados** - Combina dados de múltiplos microservices  
-✅ **Proxy CRUD** - Encaminha requisições para Delivery e Orders Services  
-✅ **Integração com Azure Functions** - CREATE via eventos HTTP Trigger  
-✅ **Health Check** - Monitora status de todos os serviços  
-✅ **Error Handling** - Tratamento robusto de erros  
-✅ **Logging** - Winston para rastreamento completo  
-✅ **Docker** - Container pronto para deploy  
+The BFF Service acts as the main facade for the ClickDelivery platform, orchestrating calls to multiple microservices, aggregating data, and providing a consistent API for frontend applications.
 
----
+### Key Features
 
-## 🛠️ Tecnologias
-
-- **Node.js 18+**
-- **Express.js** - Framework web
-- **Axios** - Cliente HTTP para chamadas aos microservices
-- **Winston** - Logging estruturado
-- **Helmet** - Segurança HTTP
-- **CORS** - Cross-Origin Resource Sharing
-- **Docker** - Containerização
+✅ **Unified API Gateway** - Single entry point for all microservices  
+✅ **Data Aggregation** - Dashboard and customer overview with data from multiple services  
+✅ **JWT Authentication** - Auth0 integration with JWKS validation  
+✅ **OPA Authorization** (Optional) - Policy-based access control  
+✅ **Request Proxying** - Intelligent forwarding to appropriate microservices  
+✅ **Consolidated Health Checks** - Monitor all dependencies  
+✅ **Response Caching** - In-memory cache with TTL for aggregated endpoints  
+✅ **Correlation ID Tracking** - Request tracing across all services  
+✅ **Structured Logging** - Winston-based JSON logging  
+✅ **Clean Architecture** - Separation of concerns with clear layers  
+✅ **Docker Ready** - Containerized with health checks  
+✅ **CI/CD Pipeline** - Automated testing and Docker publishing
 
 ---
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
 ```
-┌──────────────┐
-│  Frontend    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ BFF Service  │ ◄─── Você está aqui
-└──┬───────┬───┘
-   │       │
-   ▼       ▼
-┌────────┐ ┌────────┐ ┌─────────────┐
-│Delivery│ │ Orders │ │   Azure     │
-│Service │ │Service │ │  Functions  │
-│(Azure  │ │(MongoDB│ │(HTTP Trigger│
-│  SQL)  │ │ Atlas) │ │   Events)   │
-└────────┘ └────────┘ └─────────────┘
-```
-
----
-
-## 📂 Estrutura do Projeto
-
-```
-bff-service/
-├── src/
-│   ├── config/
-│   │   └── services.js
-│   ├── services/
-│   │   ├── deliveryService.js
-│   │   ├── ordersService.js
-│   │   └── functionService.js
-│   ├── controllers/
-│   │   ├── aggregationController.js
-│   │   ├── eventController.js
-│   │   ├── deliveryController.js
-│   │   └── ordersController.js
-│   ├── routes/
-│   │   ├── index.js
-│   │   ├── aggregation.routes.js
-│   │   ├── events.routes.js
-│   │   ├── delivery.routes.js
-│   │   └── orders.routes.js
-│   ├── middlewares/
-│   │   └── errorHandler.js
-│   ├── utils/
-│   │   └── logger.js
-│   └── app.js
-├── logs/
-├── .env
-├── Dockerfile
-├── docker-compose.yml
-├── openapi.yaml
-└── README.md
+┌──────────────────┐
+│   Frontend Web   │
+└────────┬─────────┘
+         │
+         ▼
+┌────────────────────────────────────────────────┐
+│              BFF Service                       │
+│  ┌──────────────────────────────────────────┐ │
+│  │  API Layer (Routes & Controllers)       │ │
+│  └──────────────┬───────────────────────────┘ │
+│                 │                               │
+│  ┌──────────────▼───────────────────────────┐ │
+│  │  Core Layer (Services & Aggregators)    │ │
+│  └──────────────┬───────────────────────────┘ │
+│                 │                               │
+│  ┌──────────────▼───────────────────────────┐ │
+│  │  Infrastructure (HTTP, Auth, Cache)     │ │
+│  └──────────────────────────────────────────┘ │
+└───┬────┬────┬────┬────┬────┬────────────────┘
+    │    │    │    │    │    │
+    ▼    ▼    ▼    ▼    ▼    ▼
+┌───────┬───────┬────────┬────────┬──────────┬────────┐
+│ User  │Orders │Delivery│ Rental │Notifica- │ Report │
+│Service│Service│Service │Service │tion Svc  │Service │
+└───────┴───────┴────────┴────────┴──────────┴────────┘
 ```
 
 ---
 
-## 🚀 Instalação
+## 🔗 Integrated Microservices
 
-### Pré-requisitos
+The BFF integrates with the following microservices:
+
+| Service | Purpose | URL |
+|---------|---------|-----|
+| **User Service** | User management and authentication | `https://clickdelivery-user-service.azurewebsites.net/api/v1` |
+| **Orders Service** | Order management, restaurants, menus | `https://delivery-service-api.azurewebsites.net/api/v1` |
+| **Delivery Service** | Delivery tracking and management | `https://delivery-service-microservice.azurewebsites.net/api/v1` |
+| **Rental Service** | Vehicle rental management | `https://clickdelivery-rental-service.azurewebsites.net/api/v1` |
+| **Notification Service** | Notifications and alerts | `https://clickdelivery-notification-service.azurewebsites.net/api/v1` |
+| **Report Service** | Analytics and reporting | `https://clickdelivery-report-service.azurewebsites.net/api/v1` |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
 
 - Node.js 18+
-- Docker (opcional)
-- Delivery Service rodando (porta 8082)
-- Orders Service rodando (porta 8081)
+- npm or yarn
+- Docker (optional)
 
-### 1. Clonar Repositório
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/iYoNuttxD/bff-service.git
 cd bff-service
 ```
 
-### 2. Instalar Dependências
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configurar Variáveis de Ambiente
+### 3. Configure Environment Variables
 
 ```bash
 cp .env.example .env
 ```
 
-Edite o arquivo `.env`:
+Edit `.env` with your configuration:
 
 ```env
-NODE_ENV=development
+NODE_ENV=production
 PORT=3000
-
-# Microservices
-DELIVERY_SERVICE_URL=http://localhost:8082
-ORDERS_SERVICE_URL=http://localhost:8081
-
-# Azure Functions
-FUNCTION_CREATE_URL=https://erp-events-functions.azurewebsites.net/api/CreateEvent
-FUNCTION_GET_URL=https://erp-events-functions.azurewebsites.net/api/GetData
-
-# Configuration
-SERVICE_TIMEOUT=30000
 LOG_LEVEL=info
+
+# Microservices URLs
+USER_SERVICE_URL=https://clickdelivery-user-service.azurewebsites.net/api/v1
+ORDERS_SERVICE_URL=https://delivery-service-api.azurewebsites.net/api/v1
+DELIVERY_SERVICE_URL=https://delivery-service-microservice.azurewebsites.net/api/v1
+RENTAL_SERVICE_URL=https://clickdelivery-rental-service.azurewebsites.net/api/v1
+NOTIFICATION_SERVICE_URL=https://clickdelivery-notification-service.azurewebsites.net/api/v1
+REPORT_SERVICE_URL=https://clickdelivery-report-service.azurewebsites.net/api/v1
+
+SERVICE_TIMEOUT=30000
+
+# Auth0 Configuration
+AUTH_JWKS_URI=https://dev-zr81bdbz643gzhom.us.auth0.com/.well-known/jwks.json
+AUTH_ISSUER=https://dev-zr81bdbz643gzhom.us.auth0.com
+AUTH_AUDIENCE=clickdelivery-api
+AUTH_JWT_REQUIRED=true
 ```
 
-### 4. Executar em Desenvolvimento
+### 4. Run in Development
 
 ```bash
 npm run dev
 ```
 
-Servidor disponível em: **http://localhost:3000**
+Server available at: **http://localhost:3000**
 
-### 5. Executar em Produção
+### 5. Run in Production
 
 ```bash
 npm start
@@ -160,325 +148,191 @@ npm start
 
 ## 🐳 Docker
 
-### Build da imagem
+### Build & Run
 
 ```bash
 docker build -t iyonuttxd/bff-service:latest .
-```
-
-### Executar container
-
-```bash
 docker run -p 3000:3000 --env-file .env iyonuttxd/bff-service:latest
 ```
 
-### Docker Compose
+### Pull from Docker Hub
 
 ```bash
-docker-compose up
-```
-
-### Docker Compose com todos os serviços
-
-```bash
-docker-compose --profile full-stack up
+docker pull iyonuttxd/bff-service:latest
 ```
 
 ---
 
 ## 📡 API Endpoints
 
-### Health Check
+### Health & Information
 
+#### Service Info
 ```http
-GET /api/health
+GET /
 ```
 
-Retorna o status do BFF.
+#### Consolidated Health Check
+```http
+GET /api/v1/health
+```
+
+Returns health status of BFF and all integrated microservices.
 
 ---
 
-### Agregação de Dados
+### Aggregated Endpoints
 
-#### Dashboard Agregado
+#### Dashboard Overview
 ```http
-GET /api/dashboard
+GET /api/v1/dashboard/overview
+Authorization: Bearer <token>
 ```
 
-Retorna dados agregados de Orders Service, Delivery Service e Azure Function.
+Returns aggregated dashboard data from all services.
 
-**Resposta:**
-```json
-{
-  "success": true,
-  "data": {
-    "orders": {
-      "total": 10,
-      "pending": 3,
-      "delivered": 7
-    },
-    "deliveries": {
-      "total": 15,
-      "active": 5,
-      "completed": 10
-    },
-    "events": {
-      "total": 50,
-      "recent": [...]
-    }
-  }
-}
-```
-
-#### Pedido Completo com Entrega
+#### User Summary
 ```http
-GET /api/aggregation/pedido-completo/:pedidoId
+GET /api/v1/me/summary
+Authorization: Bearer <token>
 ```
 
-Combina dados do pedido (Orders) com dados da entrega (Delivery).
-
-#### Health Check de Todos os Serviços
-```http
-GET /api/aggregation/health
-```
-
-Verifica o status de BFF, Delivery Service e Orders Service.
+Returns aggregated user summary with counters.
 
 ---
 
-### Eventos (Azure Functions)
+### Proxy Endpoints
 
-#### Criar via Evento
+All requests to these endpoints are forwarded to the respective microservices:
+
+- `/api/v1/users/**` → User Service
+- `/api/v1/orders/**` → Orders Service
+- `/api/v1/deliveries/**` → Delivery Service
+- `/api/v1/rentals/**` → Rental Service
+- `/api/v1/notifications/**` → Notification Service
+- `/api/v1/reports/**` → Report Service
+
+**Headers Propagated:**
+- `Authorization: Bearer <token>`
+- `x-correlation-id`
+
+---
+
+## 🔐 Authentication
+
+JWT authentication via Auth0:
+
 ```http
-POST /api/events
-Content-Type: application/json
+Authorization: Bearer <your-jwt-token>
 ```
 
-**Body:**
-```json
-{
-  "type": "PEDIDO_CRIADO",
-  "data": {
-    "pedidoId": "123",
-    "clienteId": "456",
-    "valor": 100.00
-  }
-}
-```
+Configure via environment variables:
+- `AUTH_JWKS_URI`
+- `AUTH_ISSUER`
+- `AUTH_AUDIENCE`
+- `AUTH_JWT_REQUIRED` (true/false)
 
-Envia evento para Azure Function via HTTP Trigger.  
-A Function persiste os dados no MongoDB Atlas.
+---
 
-#### Buscar Dados da Function
-```http
-GET /api/events
-GET /api/events/:id
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run with coverage
+npm test -- --coverage
 ```
 
 ---
 
-### Proxy - Delivery Service
+## 📚 Documentation
 
-#### Entregadores
-```http
-GET    /api/delivery/entregadores
-GET    /api/delivery/entregadores/:id
-POST   /api/delivery/entregadores
-PUT    /api/delivery/entregadores/:id
-DELETE /api/delivery/entregadores/:id
+Interactive API documentation available at:
+
 ```
-
-#### Veículos
-```http
-GET    /api/delivery/veiculos
-GET    /api/delivery/veiculos/:id
-POST   /api/delivery/veiculos
-PUT    /api/delivery/veiculos/:id
-DELETE /api/delivery/veiculos/:id
-```
-
-#### Aluguéis
-```http
-GET    /api/delivery/alugueis
-GET    /api/delivery/alugueis/:id
-POST   /api/delivery/alugueis
-PATCH  /api/delivery/alugueis/:id/finalizar
-PATCH  /api/delivery/alugueis/:id/cancelar
-```
-
-#### Entregas
-```http
-GET    /api/delivery/entregas
-GET    /api/delivery/entregas/:id
-POST   /api/delivery/entregas
-PATCH  /api/delivery/entregas/:id/status
+http://localhost:3000/api/v1/api-docs
 ```
 
 ---
 
-### Proxy - Orders Service
+## 🛠️ Development
 
-#### Clientes
-```http
-GET    /api/orders/clientes
-GET    /api/orders/clientes/:id
-POST   /api/orders/clientes
-PUT    /api/orders/clientes/:id
-DELETE /api/orders/clientes/:id
-```
+```bash
+# Linting
+npm run lint
+npm run lint:fix
 
-#### Restaurantes
-```http
-GET    /api/orders/restaurantes
-GET    /api/orders/restaurantes/:id
-POST   /api/orders/restaurantes
-PUT    /api/orders/restaurantes/:id
-DELETE /api/orders/restaurantes/:id
-```
-
-#### Cardápios
-```http
-GET    /api/orders/cardapios
-GET    /api/orders/cardapios/:id
-POST   /api/orders/cardapios
-PUT    /api/orders/cardapios/:id
-DELETE /api/orders/cardapios/:id
-```
-
-#### Pedidos
-```http
-GET    /api/orders/pedidos
-GET    /api/orders/pedidos/:id
-POST   /api/orders/pedidos
-PATCH  /api/orders/pedidos/:id/status
-PATCH  /api/orders/pedidos/:id/cancelar
-```
-
-#### Avaliações
-```http
-GET    /api/orders/avaliacoes
-GET    /api/orders/avaliacoes/:id
-POST   /api/orders/avaliacoes
-PUT    /api/orders/avaliacoes/:id
-DELETE /api/orders/avaliacoes/:id
-```
-
-#### Pagamentos
-```http
-GET    /api/orders/pagamentos
-GET    /api/orders/pagamentos/:id
-POST   /api/orders/pagamentos
-PATCH  /api/orders/pagamentos/:id/status
-PATCH  /api/orders/pagamentos/:id/processar
-PATCH  /api/orders/pagamentos/:id/cancelar
+# Development server with auto-reload
+npm run dev
 ```
 
 ---
 
-## 🧪 Testar Endpoints
+## 📂 Project Structure
 
-### Verificar Health
-
-```bash
-curl http://localhost:3000/api/health
 ```
-
-### Testar Agregação
-
-```bash
-curl http://localhost:3000/api/dashboard
-curl http://localhost:3000/api/aggregation/health
-```
-
-### Testar Proxy Delivery
-
-```bash
-curl http://localhost:3000/api/delivery/entregadores
-```
-
-### Testar Proxy Orders
-
-```bash
-curl http://localhost:3000/api/orders/clientes
-```
-
-### Criar Evento
-
-```bash
-curl -X POST http://localhost:3000/api/events \
-  -H "Content-Type: application/json" \
-  -d '{"type":"PEDIDO_CRIADO","data":{"pedidoId":"123","valor":100}}'
+src/
+  config/           # Configuration files
+  infra/            # Infrastructure layer
+    http/           # HTTP client
+    logger/         # Logging
+    auth/           # Authentication & authorization
+    cache/          # Caching
+  core/             # Business logic
+    services/       # Microservice clients
+    aggregators/    # Data aggregation
+  api/              # API layer
+    routes/         # Route handlers
+  app.js            # Express app
+  server.js         # Server startup
 ```
 
 ---
 
-## 🐳 Docker Hub
+## 🎯 Design Patterns
 
-### Pull da imagem
-
-```bash
-docker pull iyonuttxd/bff-service:latest
-```
-
-### Executar
-
-```bash
-docker run -p 3000:3000 \
-  -e DELIVERY_SERVICE_URL=http://delivery-service:8082 \
-  -e ORDERS_SERVICE_URL=http://orders-service:8081 \
-  -e FUNCTION_CREATE_URL=https://erp-events-functions.azurewebsites.net/api/CreateEvent \
-  -e FUNCTION_GET_URL=https://erp-events-functions.azurewebsites.net/api/GetData \
-  iyonuttxd/bff-service:latest
-```
+- ✅ **BFF Pattern** - Backend for Frontend
+- ✅ **API Gateway Pattern** - Single entry point
+- ✅ **Aggregation Pattern** - Combine multiple sources
+- ✅ **Clean Architecture** - Layer separation
+- ✅ **Correlation ID** - Request tracing
 
 ---
 
-## 🔗 Repositórios Relacionados
+## 🔗 Related Repositories
 
-- **MicroFrontEnd**: https://github.com/iYoNuttxD/microfrontend-erp
-- **Delivery Service**: https://github.com/iYoNuttxD/delivery-service-microservice
+- **User Service**: https://github.com/iYoNuttxD/user-service
 - **Orders Service**: https://github.com/iYoNuttxD/orders-service-microservice
-- **Azure Functions**: https://github.com/iYoNuttxD/azure-functions-v4
+- **Delivery Service**: https://github.com/iYoNuttxD/delivery-service-microservice
+- **Rental Service**: https://github.com/iYoNuttxD/rental-service
+- **Notification Service**: https://github.com/iYoNuttxD/notification-service
+- **Report Service**: https://github.com/iYoNuttxD/report-service
 
 ---
 
-## 📚 Documentação
+## 📄 License
 
-- **OpenAPI Spec**: `openapi.yaml`
-- **Swagger UI**: http://localhost:3000/api-docs (quando disponível)
-
----
-
-## 🎯 Padrões Implementados
-
-- ✅ **BFF Pattern** (Backend For Frontend)
-- ✅ **API Gateway Pattern** (Proxy)
-- ✅ **Aggregation Pattern** (Combinar dados)
-- ✅ **Event Sourcing** (Via Azure Functions)
-- ✅ **Health Check Pattern**
-- ✅ **Circuit Breaker** (Timeout handling)
+MIT License - see LICENSE for more details.
 
 ---
 
-## 📄 Licença
-
-MIT License - veja LICENSE para mais detalhes.
-
----
-
-## 👤 Autor
+## 👤 Author
 
 **iYoNuttxD**
 
 - GitHub: [@iYoNuttxD](https://github.com/iYoNuttxD)
-- Repositório: https://github.com/iYoNuttxD/bff-service
+- Repository: https://github.com/iYoNuttxD/bff-service
 
 ---
 
-## 📅 Versão
+## 📅 Version
 
-**v1.0.0** - 27/10/2025
+**v2.0.0** - Complete refactoring with Clean Architecture
 
 ---
 
-**⭐ Se este projeto te ajudou, considere dar uma estrela no GitHub!**
+**⭐ If this project helped you, consider giving it a star on GitHub!**
