@@ -1,38 +1,38 @@
-# 🔄 BFF Service - ClickDelivery Platform
+# 🔄 Serviço BFF - Plataforma ClickDelivery
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)
 ![Express](https://img.shields.io/badge/Express-4.18-blue.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**Backend For Frontend (BFF)** - Unified API gateway and aggregation layer for the ClickDelivery platform, providing a single, stable interface between the frontend and all microservices.
+**Backend For Frontend (BFF)** - Camada unificada de API Gateway e agregação da plataforma ClickDelivery, fornecendo uma interface única e estável entre o frontend e todos os microsserviços.
 
 Desenvolvido por: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
 
 ---
 
-## 🎯 Overview
+## 🎯 Visão Geral
 
-The BFF Service acts as the main facade for the ClickDelivery platform, orchestrating calls to multiple microservices, aggregating data, and providing a consistent API for frontend applications.
+O serviço BFF atua como a principal fachada da plataforma ClickDelivery, orquestrando chamadas para múltiplos microsserviços, agregando dados e fornecendo uma API consistente para as aplicações frontend.
 
-### Key Features
+### Principais Funcionalidades
 
-✅ **Unified API Gateway** - Single entry point for all microservices  
-✅ **Data Aggregation** - Dashboard and customer overview with data from multiple services  
-✅ **JWT Authentication** - Auth0 integration with JWKS validation  
-✅ **OPA Authorization** (Optional) - Policy-based access control  
-✅ **Request Proxying** - Intelligent forwarding to appropriate microservices  
-✅ **Consolidated Health Checks** - Monitor all dependencies  
-✅ **Response Caching** - In-memory cache with TTL for aggregated endpoints  
-✅ **Correlation ID Tracking** - Request tracing across all services  
-✅ **Structured Logging** - Winston-based JSON logging  
-✅ **Clean Architecture** - Separation of concerns with clear layers  
-✅ **Docker Ready** - Containerized with health checks  
-✅ **CI/CD Pipeline** - Automated testing and Docker publishing
+✅ **API Gateway Unificado** - Ponto único de entrada para todos os microsserviços  
+✅ **Agregação de Dados** - Painel e resumo do cliente com dados de múltiplos serviços  
+✅ **Autenticação JWT** - Integração com Auth0 e validação via JWKS  
+✅ **Autorização OPA** (Opcional) - Controle de acesso baseado em políticas  
+✅ **Proxy de Requisições** - Encaminhamento inteligente para os microsserviços apropriados  
+✅ **Health Checks Consolidados** - Monitoramento de todas as dependências  
+✅ **Cache de Resposta** - Cache em memória com TTL para endpoints agregados  
+✅ **Rastreamento de Correlation ID** - Rastreamento de requisições entre serviços  
+✅ **Logs Estruturados** - Logging em JSON com Winston  
+✅ **Clean Architecture** - Separação de camadas e responsabilidades  
+✅ **Compatível com Docker** - Container com health check  
+✅ **CI/CD** - Pipeline automatizado de testes e publicação Docker
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Arquitetura
 
 ```
 ┌──────────────────┐
@@ -41,79 +41,77 @@ The BFF Service acts as the main facade for the ClickDelivery platform, orchestr
          │
          ▼
 ┌────────────────────────────────────────────────┐
-│              BFF Service                       │
+│              Serviço BFF                       │
 │  ┌──────────────────────────────────────────┐ │
-│  │  API Layer (Routes & Controllers)       │ │
+│  │  Camada API (Rotas e Controladores)     │ │
 │  └──────────────┬───────────────────────────┘ │
 │                 │                               │
 │  ┌──────────────▼───────────────────────────┐ │
-│  │  Core Layer (Services & Aggregators)    │ │
+│  │  Camada Core (Serviços e Agregadores)   │ │
 │  └──────────────┬───────────────────────────┘ │
 │                 │                               │
 │  ┌──────────────▼───────────────────────────┐ │
-│  │  Infrastructure (HTTP, Auth, Cache)     │ │
+│  │  Infraestrutura (HTTP, Auth, Cache)     │ │
 │  └──────────────────────────────────────────┘ │
 └───┬────┬────┬────┬────┬────┬────────────────┘
     │    │    │    │    │    │
     ▼    ▼    ▼    ▼    ▼    ▼
 ┌───────┬───────┬────────┬────────┬──────────┬────────┐
-│ User  │Orders │Delivery│ Rental │Notifica- │ Report │
-│Service│Service│Service │Service │tion Svc  │Service │
+│ Usuário │Pedidos│Entrega│ Aluguel│Notifica.│ Relatórios│
+│ Service │Service│Service│ Service│ Service │ Service  │
 └───────┴───────┴────────┴────────┴──────────┴────────┘
 ```
 
 ---
 
-## 🔗 Integrated Microservices
+## 🔗 Microsserviços Integrados
 
-The BFF integrates with the following microservices:
-
-| Service | Purpose | URL |
-|---------|---------|-----|
-| **User Service** | User management and authentication | `https://clickdelivery-user-service.azurewebsites.net/api/v1` |
-| **Orders Service** | Order management, restaurants, menus | `https://delivery-service-api.azurewebsites.net/api/v1` |
-| **Delivery Service** | Delivery tracking and management | `https://delivery-service-microservice.azurewebsites.net/api/v1` |
-| **Rental Service** | Vehicle rental management | `https://clickdelivery-rental-service.azurewebsites.net/api/v1` |
-| **Notification Service** | Notifications and alerts | `https://clickdelivery-notification-service.azurewebsites.net/api/v1` |
-| **Report Service** | Analytics and reporting | `https://clickdelivery-report-service.azurewebsites.net/api/v1` |
+| Serviço | Função | URL |
+|----------|--------|-----|
+| **User Service** | Gerenciamento e autenticação de usuários | `https://clickdelivery-user-service.azurewebsites.net/api/v1` |
+| **Orders Service** | Gestão de pedidos, restaurantes e cardápios | `https://delivery-service-api.azurewebsites.net/api/v1` |
+| **Delivery Service** | Rastreamento e gestão de entregas | `https://delivery-service-microservice.azurewebsites.net/api/v1` |
+| **Rental Service** | Gestão de locação de veículos | `https://clickdelivery-rental-service.azurewebsites.net/api/v1` |
+| **Notification Service** | Envio de notificações e alertas | `https://clickdelivery-notification-service.azurewebsites.net/api/v1` |
+| **Report Service** | Relatórios e análises | `https://clickdelivery-report-service.azurewebsites.net/api/v1` |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Primeiros Passos
 
-### Prerequisites
+### Pré-requisitos
 
 - Node.js 18+
-- npm or yarn
-- Docker (optional)
+- npm ou yarn
+- Docker (opcional)
 
-### 1. Clone Repository
+### 1. Clonar o Repositório
 
 ```bash
 git clone https://github.com/iYoNuttxD/bff-service.git
 cd bff-service
 ```
 
-### 2. Install Dependencies
+### 2. Instalar Dependências
 
 ```bash
 npm install
 ```
 
-### 3. Configure Environment Variables
+### 3. Configurar Variáveis de Ambiente
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration:
+Edite o arquivo `.env` com suas configurações:
 
 ```env
 NODE_ENV=production
 PORT=3000
 LOG_LEVEL=info
 
-# Microservices URLs
+# URLs dos Microsserviços
 USER_SERVICE_URL=https://clickdelivery-user-service.azurewebsites.net/api/v1
 ORDERS_SERVICE_URL=https://delivery-service-api.azurewebsites.net/api/v1
 DELIVERY_SERVICE_URL=https://delivery-service-microservice.azurewebsites.net/api/v1
@@ -123,22 +121,22 @@ REPORT_SERVICE_URL=https://clickdelivery-report-service.azurewebsites.net/api/v1
 
 SERVICE_TIMEOUT=30000
 
-# Auth0 Configuration
+# Configuração Auth0
 AUTH_JWKS_URI=https://dev-zr81bdbz643gzhom.us.auth0.com/.well-known/jwks.json
 AUTH_ISSUER=https://dev-zr81bdbz643gzhom.us.auth0.com
 AUTH_AUDIENCE=clickdelivery-api
 AUTH_JWT_REQUIRED=true
 ```
 
-### 4. Run in Development
+### 4. Rodar em Desenvolvimento
 
 ```bash
 npm run dev
 ```
 
-Server available at: **http://localhost:3000**
+Servidor disponível em: **http://localhost:3000**
 
-### 5. Run in Production
+### 5. Rodar em Produção
 
 ```bash
 npm start
@@ -148,14 +146,14 @@ npm start
 
 ## 🐳 Docker
 
-### Build & Run
+### Build e Execução
 
 ```bash
 docker build -t iyonuttxd/bff-service:latest .
 docker run -p 3000:3000 --env-file .env iyonuttxd/bff-service:latest
 ```
 
-### Pull from Docker Hub
+### Pull do Docker Hub
 
 ```bash
 docker pull iyonuttxd/bff-service:latest
@@ -163,95 +161,95 @@ docker pull iyonuttxd/bff-service:latest
 
 ---
 
-## 📡 API Endpoints
+## 📡 Endpoints Principais
 
-### Health & Information
+### Health e Informações
 
-#### Service Info
+#### Info do Serviço
 ```http
 GET /
 ```
 
-#### Consolidated Health Check
+#### Health Check Consolidado
 ```http
 GET /api/v1/health
 ```
 
-Returns health status of BFF and all integrated microservices.
+Retorna o status do BFF e de todos os microsserviços.
 
 ---
 
-### Aggregated Endpoints
+### Endpoints Agregados
 
-#### Dashboard Overview
+#### Visão Geral do Dashboard
 ```http
 GET /api/v1/dashboard/overview
 Authorization: Bearer <token>
 ```
 
-Returns aggregated dashboard data from all services.
+Retorna dados agregados de todos os serviços.
 
-#### User Summary
+#### Resumo do Usuário
 ```http
 GET /api/v1/me/summary
 Authorization: Bearer <token>
 ```
 
-Returns aggregated user summary with counters.
+Retorna o resumo agregado do usuário com contadores.
 
 ---
 
-### Proxy Endpoints
+### Endpoints Proxy
 
-All requests to these endpoints are forwarded to the respective microservices:
+Todas as requisições para os endpoints abaixo são encaminhadas aos respectivos microsserviços:
 
-- `/api/v1/users/**` → User Service
-- `/api/v1/orders/**` → Orders Service
-- `/api/v1/deliveries/**` → Delivery Service
-- `/api/v1/rentals/**` → Rental Service
-- `/api/v1/notifications/**` → Notification Service
-- `/api/v1/reports/**` → Report Service
+- `/api/v1/users/**` → User Service  
+- `/api/v1/orders/**` → Orders Service  
+- `/api/v1/deliveries/**` → Delivery Service  
+- `/api/v1/rentals/**` → Rental Service  
+- `/api/v1/notifications/**` → Notification Service  
+- `/api/v1/reports/**` → Report Service  
 
-**Headers Propagated:**
-- `Authorization: Bearer <token>`
+**Cabeçalhos Propagados:**
+- `Authorization: Bearer <token>`  
 - `x-correlation-id`
 
 ---
 
-## 🔐 Authentication
+## 🔐 Autenticação
 
-JWT authentication via Auth0:
+Autenticação JWT via Auth0:
 
 ```http
-Authorization: Bearer <your-jwt-token>
+Authorization: Bearer <seu-token-jwt>
 ```
 
-Configure via environment variables:
+Configurar via variáveis de ambiente:
 - `AUTH_JWKS_URI`
 - `AUTH_ISSUER`
 - `AUTH_AUDIENCE`
-- `AUTH_JWT_REQUIRED` (true/false)
+- `AUTH_JWT_REQUIRED`
 
 ---
 
-## 🧪 Testing
+## 🧪 Testes
 
 ```bash
-# Run all tests
+# Rodar todos os testes
 npm test
 
-# Run tests in watch mode
+# Modo watch
 npm run test:watch
 
-# Run with coverage
+# Com cobertura
 npm test -- --coverage
 ```
 
 ---
 
-## 📚 Documentation
+## 📚 Documentação
 
-Interactive API documentation available at:
+Documentação interativa da API disponível em:
 
 ```
 http://localhost:3000/api/v1/api-docs
@@ -259,80 +257,67 @@ http://localhost:3000/api/v1/api-docs
 
 ---
 
-## 🛠️ Development
-
-```bash
-# Linting
-npm run lint
-npm run lint:fix
-
-# Development server with auto-reload
-npm run dev
-```
-
----
-
-## 📂 Project Structure
+## 📂 Estrutura do Projeto
 
 ```
 src/
-  config/           # Configuration files
-  infra/            # Infrastructure layer
-    http/           # HTTP client
+  config/           # Arquivos de configuração
+  infra/            # Camada de infraestrutura
+    http/           # Cliente HTTP
     logger/         # Logging
-    auth/           # Authentication & authorization
-    cache/          # Caching
-  core/             # Business logic
-    services/       # Microservice clients
-    aggregators/    # Data aggregation
-  api/              # API layer
-    routes/         # Route handlers
-  app.js            # Express app
-  server.js         # Server startup
+    auth/           # Autenticação e autorização
+    cache/          # Cache
+  core/             # Lógica de negócio
+    services/       # Clientes dos microsserviços
+    aggregators/    # Agregação de dados
+  api/              # Camada de API
+    routes/         # Manipuladores de rota
+  app.js            # Aplicação Express
+  server.js         # Inicialização do servidor
 ```
 
 ---
 
-## 🎯 Design Patterns
+## 🎯 Padrões de Design
 
-- ✅ **BFF Pattern** - Backend for Frontend
-- ✅ **API Gateway Pattern** - Single entry point
-- ✅ **Aggregation Pattern** - Combine multiple sources
-- ✅ **Clean Architecture** - Layer separation
-- ✅ **Correlation ID** - Request tracing
-
----
-
-## 🔗 Related Repositories
-
-- **User Service**: https://github.com/iYoNuttxD/user-service
-- **Orders Service**: https://github.com/iYoNuttxD/orders-service-microservice
-- **Delivery Service**: https://github.com/iYoNuttxD/delivery-service-microservice
-- **Rental Service**: https://github.com/iYoNuttxD/rental-service
-- **Notification Service**: https://github.com/iYoNuttxD/notification-service
-- **Report Service**: https://github.com/iYoNuttxD/report-service
+- ✅ **BFF Pattern** - Backend for Frontend  
+- ✅ **API Gateway Pattern** - Ponto único de entrada  
+- ✅ **Aggregation Pattern** - Combina múltiplas fontes  
+- ✅ **Clean Architecture** - Separação de camadas  
+- ✅ **Correlation ID** - Rastreamento de requisições
 
 ---
 
-## 📄 License
+## 🔗 Repositórios Relacionados
 
-MIT License - see LICENSE for more details.
+- **User Service**: https://github.com/iYoNuttxD/user-service  
+- **Orders Service**: https://github.com/iYoNuttxD/orders-service-microservice  
+- **Delivery Service**: https://github.com/iYoNuttxD/delivery-service-microservice  
+- **Rental Service**: https://github.com/iYoNuttxD/rental-service  
+- **Notification Service**: https://github.com/iYoNuttxD/notification-service  
+- **Report Service**: https://github.com/iYoNuttxD/report-service  
 
 ---
 
-## 👤 Author
+## 📄 Licença
+
+Licença MIT - consulte o arquivo LICENSE para mais detalhes.
+
+---
+
+## 👤 Autor
 
 **iYoNuttxD**
 
 - GitHub: [@iYoNuttxD](https://github.com/iYoNuttxD)
-- Repository: https://github.com/iYoNuttxD/bff-service
+- Repositório: https://github.com/iYoNuttxD/bff-service
 
 ---
 
-## 📅 Version
+## 📅 Versão
 
-**v2.0.0** - Complete refactoring with Clean Architecture
+**v2.0.0** - Refatoração completa com Clean Architecture
 
 ---
 
-**⭐ If this project helped you, consider giving it a star on GitHub!**
+**⭐ Se este projeto te ajudou, considere deixar uma estrela no GitHub!**
