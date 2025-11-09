@@ -3,15 +3,15 @@ info:
   title: BFF Service API - ClickDelivery Platform
   description: |
     **Backend For Frontend (BFF)** - Unified API Gateway for ClickDelivery Platform
-    
+
     The BFF acts as the main facade between frontend and all microservices:
     - 👤 **User Service** - User management and authentication
-    - 📦 **Orders Service** - Order management, restaurants, menus
-    - 🚚 **Delivery Service** - Delivery tracking and management
+    - 📦 **Orders Service** (`delivery-service-api`) - Orders, customers, restaurants, menus, payments, reviews
+    - 🚚 **Delivery Service** (`delivery-service-microservice`) - Deliveries, drivers, vehicles, rentals tracking
     - 🚗 **Rental Service** - Vehicle rental management
     - 🔔 **Notification Service** - Notifications and alerts
     - 📊 **Report Service** - Analytics and reporting
-    
+
     ### Features:
     - ✅ Data aggregation from multiple services
     - ✅ JWT authentication (Auth0)
@@ -19,9 +19,9 @@ info:
     - ✅ Consolidated health checks
     - ✅ Response caching
     - ✅ Correlation ID tracking
-    
+
     Developed by: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
-  version: 2.0.0
+  version: 2.0.1
   contact:
     name: iYoNuttxD
     url: https://github.com/iYoNuttxD
@@ -41,11 +41,11 @@ tags:
   - name: Dashboard
     description: Aggregated data endpoints
   - name: Users
-    description: User management proxy
+    description: User service proxy (Auth & Profile)
   - name: Orders
-    description: Orders service proxy
+    description: Orders service proxy (delivery-service-api)
   - name: Deliveries
-    description: Delivery service proxy
+    description: Delivery service proxy (delivery-service-microservice)
   - name: Rentals
     description: Rental service proxy
   - name: Notifications
@@ -142,8 +142,7 @@ components:
 paths:
   /:
     get:
-      tags:
-        - Health
+      tags: [Health]
       summary: Service Information
       description: Returns information about the BFF service and available endpoints
       responses:
@@ -169,8 +168,7 @@ paths:
 
   /health:
     get:
-      tags:
-        - Health
+      tags: [Health]
       summary: Consolidated Health Check
       description: Returns health status of BFF and all integrated microservices
       responses:
@@ -189,8 +187,7 @@ paths:
 
   /dashboard/overview:
     get:
-      tags:
-        - Dashboard
+      tags: [Dashboard]
       summary: Dashboard Overview
       description: Returns aggregated dashboard data from all microservices
       security:
@@ -217,8 +214,7 @@ paths:
 
   /me/summary:
     get:
-      tags:
-        - Dashboard
+      tags: [Dashboard]
       summary: User Summary
       description: Returns aggregated user summary with counters from all services
       security:
@@ -252,27 +248,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /users:
-    get:
-      tags:
-        - Users
-      summary: List Users
-      description: Proxies request to User Service
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Users retrieved successfully
-        '401':
-          description: Unauthorized
-
+  # ==================== USERS (User Service Proxy) ====================
+  /users/register:
     post:
-      tags:
-        - Users
-      summary: Create User
-      description: Proxies request to User Service
-      security:
-        - bearerAuth: []
+      tags: [Users]
+      summary: Register a new user
+      description: Proxies to User Service: POST /users/register
       requestBody:
         required: true
         content:
@@ -281,57 +262,52 @@ paths:
               type: object
       responses:
         '201':
-          description: User created successfully
+          description: User registered successfully
+        '400':
+          description: Validation error
+        '409':
+          description: User already exists
+        '500':
+          description: Internal server error
+
+  /users/login:
+    post:
+      tags: [Users]
+      summary: Login
+      description: Proxies to User Service: POST /users/login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Login successful
         '401':
-          description: Unauthorized
+          description: Invalid credentials
+        '500':
+          description: Internal server error
 
   /users/me:
     get:
-      tags:
-        - Users
-      summary: Get Current User Profile
-      description: Proxies request to User Service
+      tags: [Users]
+      summary: Get current user profile
+      description: Proxies to User Service: GET /users/me
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: User profile retrieved successfully
+          description: Profile retrieved successfully
         '401':
           description: Unauthorized
 
-  /users/{id}:
-    get:
-      tags:
-        - Users
-      summary: Get User by ID
-      description: Proxies request to User Service
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: User retrieved successfully
-        '404':
-          description: User not found
-
     put:
-      tags:
-        - Users
-      summary: Update User
-      description: Proxies request to User Service
+      tags: [Users]
+      summary: Update current user profile
+      description: Proxies to User Service: PUT /users/me
       security:
         - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
       requestBody:
         required: true
         content:
@@ -340,38 +316,53 @@ paths:
               type: object
       responses:
         '200':
-          description: User updated successfully
+          description: Profile updated successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
 
-    delete:
-      tags:
-        - Users
-      summary: Delete User
-      description: Proxies request to User Service
+  /users/me/password:
+    put:
+      tags: [Users]
+      summary: Change current user password
+      description: Proxies to User Service: PUT /users/me/password
       security:
         - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         '200':
-          description: User deleted successfully
+          description: Password changed successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
 
+  # ==================== ORDERS (delivery-service-api Proxy) ====================
   /orders/{proxy+}:
     get:
-      tags:
-        - Orders
-      summary: Proxy to Orders Service
+      tags: [Orders]
+      summary: Proxy GET to Orders Service
       description: |
-        Forwards all requests to Orders Service. Available endpoints:
-        - /pedidos - Orders
-        - /clientes - Customers
-        - /restaurantes - Restaurants
-        - /cardapios - Menus
-        - /avaliacoes - Reviews
-        - /pagamentos - Payments
+        Forwards GET requests to **Orders Service** (delivery-service-api).
+
+        Base: `https://delivery-service-api.azurewebsites.net/api/v1`
+
+        Supported target endpoints include:
+        - `/health`
+        - `/metrics`
+        - `/clientes`, `/clientes/{id}`
+        - `/restaurantes`, `/restaurantes/{id}`, `/restaurantes/categoria/{categoria}`
+        - `/cardapios`, `/cardapios/{id}`, `/cardapios/restaurante/{restauranteId}`, `/cardapios/{id}/disponibilidade`
+        - `/pedidos`, `/pedidos/{id}`, `/pedidos/dashboard`, `/pedidos/{id}/status`, `/pedidos/{id}/cancelar`
+        - `/avaliacoes`, `/avaliacoes/{id}`, `/avaliacoes/restaurante/{restauranteId}/media`
+        - `/pagamentos`, `/pagamentos/{id}`, `/pagamentos/pedido/{pedidoId}`,
+          `/pagamentos/{id}/status`, `/pagamentos/{id}/processar`, `/pagamentos/{id}/cancelar`
       security:
         - bearerAuth: []
       parameters:
@@ -380,15 +371,15 @@ paths:
           required: true
           schema:
             type: string
-          description: Orders Service path
+          description: Target path within Orders Service
       responses:
         '200':
           description: Request forwarded successfully
 
     post:
-      tags:
-        - Orders
+      tags: [Orders]
       summary: Proxy POST to Orders Service
+      description: Proxies POST requests to Orders Service for supported resources (e.g. pedidos, clientes, restaurantes, cardapios, avaliacoes, pagamentos).
       security:
         - bearerAuth: []
       parameters:
@@ -405,18 +396,47 @@ paths:
               type: object
       responses:
         '201':
-          description: Resource created successfully
+          description: Resource created via Orders Service
 
+    patch:
+      tags: [Orders]
+      summary: Proxy PATCH to Orders Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Resource updated via Orders Service
+
+  # ==================== DELIVERIES (delivery-service-microservice Proxy) ====================
   /deliveries/{proxy+}:
     get:
-      tags:
-        - Deliveries
-      summary: Proxy to Delivery Service
+      tags: [Deliveries]
+      summary: Proxy GET to Delivery Service
       description: |
-        Forwards all requests to Delivery Service. Available endpoints:
-        - /entregas - Deliveries
-        - /entregadores - Delivery persons
-        - /veiculos - Vehicles
+        Forwards GET requests to **Delivery Service**.
+
+        Base: `https://delivery-service-microservice.azurewebsites.net/api/v1`
+
+        Supported target endpoints include:
+        - `/health`, `/metrics`
+        - `/tracking/deliveries`, `/tracking/deliveries/{deliveryId}`
+        - `/tracking/drivers/{driverId}/deliveries`
+        - `/entregadores`, `/entregadores/{id}`
+        - `/veiculos`, `/veiculos/{id}`
+        - `/alugueis`, `/alugueis/{id}`
+        - `/entregas`, `/entregas/{id}`
       security:
         - bearerAuth: []
       parameters:
@@ -425,19 +445,67 @@ paths:
           required: true
           schema:
             type: string
+          description: Target path within Delivery Service
       responses:
         '200':
           description: Request forwarded successfully
 
+    post:
+      tags: [Deliveries]
+      summary: Proxy POST to Delivery Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Resource created via Delivery Service
+
+    patch:
+      tags: [Deliveries]
+      summary: Proxy PATCH to Delivery Service
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Resource updated via Delivery Service
+
+  # ==================== RENTALS (clickdelivery-rental-service Proxy) ====================
   /rentals/{proxy+}:
     get:
-      tags:
-        - Rentals
-      summary: Proxy to Rental Service
+      tags: [Rentals]
+      summary: Proxy GET to Rental Service
       description: |
-        Forwards all requests to Rental Service. Available endpoints:
-        - /alugueis - Rentals
-        - /veiculos - Vehicles
+        Forwards GET requests to **Rental Service**.
+
+        Base: `https://clickdelivery-rental-service.azurewebsites.net/api/v1`
+
+        Supported target endpoints include:
+        - `/health`, `/metrics`
+        - `/rentals`, `/rentals/{id}`
+        - `/vehicles/availability`
       security:
         - bearerAuth: []
       parameters:
@@ -446,16 +514,86 @@ paths:
           required: true
           schema:
             type: string
+          description: Target path within Rental Service
       responses:
         '200':
           description: Request forwarded successfully
 
+    post:
+      tags: [Rentals]
+      summary: Proxy POST to Rental Service
+      description: Proxies to `/rentals`, `/rentals/{id}/renew`, `/rentals/{id}/end`, `/rentals/{id}/return` when applicable.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Request forwarded successfully
+
+  # ==================== NOTIFICATIONS (clickdelivery-notification-service Proxy) ====================
   /notifications/{proxy+}:
     get:
-      tags:
-        - Notifications
-      summary: Proxy to Notification Service
-      description: Forwards all requests to Notification Service
+      tags: [Notifications]
+      summary: Proxy GET to Notification Service
+      description: |
+        Forwards GET requests to **Notification Service**.
+
+        Base: `https://clickdelivery-notification-service.azurewebsites.net/api/v1`
+
+        Supported target endpoints include:
+        - `/health`, `/metrics`
+        - `/notifications`, `/notifications/{id}`
+        - `/preferences/{userId}`
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target path within Notification Service
+      responses:
+        '200':
+          description: Request forwarded successfully
+
+    post:
+      tags: [Notifications]
+      summary: Proxy POST to Notification Service
+      description: Proxies to `/notifications` to create notifications.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy+
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Notification created via Notification Service
+
+    delete:
+      tags: [Notifications]
+      summary: Proxy DELETE to Notification Service
+      description: Proxies to `/notifications/user/{userId}` for GDPR/LGPD deletion.
       security:
         - bearerAuth: []
       parameters:
@@ -468,15 +606,22 @@ paths:
         '200':
           description: Request forwarded successfully
 
+  # ==================== REPORTS (clickdelivery-report-service Proxy) ====================
   /reports/{proxy+}:
     get:
-      tags:
-        - Reports
-      summary: Proxy to Report Service
+      tags: [Reports]
+      summary: Proxy GET to Report Service
       description: |
-        Forwards all requests to Report Service. Available endpoints:
-        - /reports - Reports
-        - /metrics - Metrics
+        Forwards GET requests to **Report Service**.
+
+        Base: `https://clickdelivery-report-service.azurewebsites.net/api/v1`
+
+        Supported target endpoints include:
+        - `/reports`
+        - `/reports/{id}`
+        - `/reports/metrics`
+        - `/health`
+        - `/metrics`
       security:
         - bearerAuth: []
       parameters:
@@ -485,6 +630,7 @@ paths:
           required: true
           schema:
             type: string
+          description: Target path within Report Service
       responses:
         '200':
           description: Request forwarded successfully
