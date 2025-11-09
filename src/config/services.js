@@ -1,69 +1,84 @@
 require('dotenv').config();
 
+const DEFAULT_TIMEOUT = parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000;
+
 module.exports = {
   userService: {
-    baseURL: process.env.USER_SERVICE_URL || 'http://localhost:3001',
-    timeout: parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000,
+    baseURL:
+      process.env.USER_SERVICE_URL ||
+      'https://clickdelivery-user-service.azurewebsites.net',
+    timeout: DEFAULT_TIMEOUT,
     endpoints: {
-      users: '/users',
-      profile: '/users/me',
-      health: '/health'
+      users: '/api/v1/users',
+      profile: '/api/v1/users/me',
+      health: '/api/v1/health'
     }
   },
-  
+
   ordersService: {
-    baseURL: process.env.ORDERS_SERVICE_URL || 'http://localhost:3002',
-    timeout: parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000,
+    baseURL:
+      process.env.ORDERS_SERVICE_URL ||
+      'https://delivery-service-api.azurewebsites.net',
+    timeout: DEFAULT_TIMEOUT,
     endpoints: {
-      clientes: '/clientes',
-      restaurantes: '/restaurantes',
-      cardapios: '/cardapios',
-      pedidos: '/pedidos',
-      avaliacoes: '/avaliacoes',
-      pagamentos: '/pagamentos',
-      health: '/health',
-      dashboard: '/pedidos/dashboard'
+      // ajusta os paths aqui conforme o swagger do orders-service
+      clientes: '/api/v1/customers',
+      restaurantes: '/api/v1/restaurants',
+      cardapios: '/api/v1/menus',
+      pedidos: '/api/v1/orders',
+      avaliacoes: '/api/v1/reviews',
+      pagamentos: '/api/v1/payments',
+      dashboard: '/api/v1/orders/dashboard',
+      health: '/api/v1/health'
     }
   },
-  
+
   deliveryService: {
-    baseURL: process.env.DELIVERY_SERVICE_URL || 'http://localhost:3003',
-    timeout: parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000,
+    baseURL:
+      process.env.DELIVERY_SERVICE_URL ||
+      'https://delivery-service-microservice.azurewebsites.net',
+    timeout: DEFAULT_TIMEOUT,
     endpoints: {
-      entregadores: '/entregadores',
-      veiculos: '/veiculos',
-      entregas: '/entregas',
-      health: '/health'
+      entregadores: '/api/v1/couriers',
+      veiculos: '/api/v1/vehicles',
+      entregas: '/api/v1/deliveries',
+      health: '/api/v1/health'
     }
   },
-  
+
   rentalService: {
-    baseURL: process.env.RENTAL_SERVICE_URL || 'http://localhost:3004',
-    timeout: parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000,
+    baseURL:
+      process.env.RENTAL_SERVICE_URL ||
+      'https://clickdelivery-rental-service.azurewebsites.net',
+    timeout: DEFAULT_TIMEOUT,
     endpoints: {
-      alugueis: '/alugueis',
-      veiculos: '/veiculos',
-      health: '/health'
+      alugueis: '/api/v1/rentals',
+      veiculos: '/api/v1/vehicles',
+      health: '/api/v1/health'
     }
   },
-  
+
   notificationService: {
-    baseURL: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005',
-    timeout: parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000,
+    baseURL:
+      process.env.NOTIFICATION_SERVICE_URL ||
+      'https://clickdelivery-notification-service.azurewebsites.net',
+    timeout: DEFAULT_TIMEOUT,
     endpoints: {
-      notifications: '/notifications',
-      send: '/notifications/send',
-      health: '/health'
+      notifications: '/api/v1/notifications',
+      send: '/api/v1/notifications/send',
+      health: '/api/v1/health'
     }
   },
-  
+
   reportService: {
-    baseURL: process.env.REPORT_SERVICE_URL || 'http://localhost:3006',
-    timeout: parseInt(process.env.SERVICE_TIMEOUT, 10) || 30000,
+    baseURL:
+      process.env.REPORT_SERVICE_URL ||
+      'https://clickdelivery-report-service.azurewebsites.net',
+    timeout: DEFAULT_TIMEOUT,
     endpoints: {
-      reports: '/reports',
-      metrics: '/metrics',
-      health: '/health'
+      reports: '/api/v1/reports',
+      metrics: '/api/v1/reports/metrics',
+      health: '/api/v1/health'
     }
   }
 };
