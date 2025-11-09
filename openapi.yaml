@@ -344,7 +344,7 @@ paths:
           description: Unauthorized
 
   # ==================== ORDERS (delivery-service-api Proxy) ====================
-  /orders/{proxy+}:
+  /orders/{proxy}:
     get:
       tags: [Orders]
       summary: Proxy GET to Orders Service
@@ -366,7 +366,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -383,7 +383,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -404,7 +404,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -420,7 +420,7 @@ paths:
           description: Resource updated via Orders Service
 
   # ==================== DELIVERIES (delivery-service-microservice Proxy) ====================
-  /deliveries/{proxy+}:
+  /deliveries/{proxy}:
     get:
       tags: [Deliveries]
       summary: Proxy GET to Delivery Service
@@ -440,7 +440,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -456,7 +456,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -477,7 +477,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -493,7 +493,7 @@ paths:
           description: Resource updated via Delivery Service
 
   # ==================== RENTALS (clickdelivery-rental-service Proxy) ====================
-  /rentals/{proxy+}:
+  /rentals/{proxy}:
     get:
       tags: [Rentals]
       summary: Proxy GET to Rental Service
@@ -509,7 +509,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -526,7 +526,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -542,7 +542,7 @@ paths:
           description: Request forwarded successfully
 
   # ==================== NOTIFICATIONS (clickdelivery-notification-service Proxy) ====================
-  /notifications/{proxy+}:
+  /notifications/{proxy}:
     get:
       tags: [Notifications]
       summary: Proxy GET to Notification Service
@@ -558,7 +558,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -575,7 +575,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -597,7 +597,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
@@ -607,7 +607,7 @@ paths:
           description: Request forwarded successfully
 
   # ==================== REPORTS (clickdelivery-report-service Proxy) ====================
-  /reports/{proxy+}:
+  /reports/{proxy}:
     get:
       tags: [Reports]
       summary: Proxy GET to Report Service
@@ -625,7 +625,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: proxy+
+        - name: proxy
           in: path
           required: true
           schema:
