@@ -35,15 +35,27 @@ class ReportService {
     }
   }
 
-  async getMetrics(headers = {}, params = {}) {
+  async getReportMetrics(headers = {}, params = {}) {
     try {
       const propagatedHeaders = this.client.propagateHeaders(headers);
-      return await this.client.get(servicesConfig.reportService.endpoints.metrics, {
+      return await this.client.get(servicesConfig.reportService.endpoints.metricsEndpoint, {
         headers: propagatedHeaders,
         params
       });
     } catch (error) {
-      logger.error('Error fetching metrics', { error: error.message });
+      logger.error('Error fetching report metrics', { error: error.message });
+      return null;
+    }
+  }
+
+  async getMetrics(headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(servicesConfig.reportService.endpoints.metrics, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error fetching report service metrics', { error: error.message });
       return null;
     }
   }
@@ -65,17 +77,20 @@ class ReportService {
         params
       };
 
+      // Prepend /api/v1 if path doesn't start with it
+      const fullPath = path.startsWith('/api/v1') ? path : `/api/v1${path}`;
+
       switch (method.toLowerCase()) {
         case 'get':
-          return await this.client.get(path, config);
+          return await this.client.get(fullPath, config);
         case 'post':
-          return await this.client.post(path, data, config);
+          return await this.client.post(fullPath, data, config);
         case 'put':
-          return await this.client.put(path, data, config);
+          return await this.client.put(fullPath, data, config);
         case 'patch':
-          return await this.client.patch(path, data, config);
+          return await this.client.patch(fullPath, data, config);
         case 'delete':
-          return await this.client.delete(path, config);
+          return await this.client.delete(fullPath, config);
         default:
           throw new Error(`Unsupported method: ${method}`);
       }

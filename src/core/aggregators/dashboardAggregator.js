@@ -136,7 +136,7 @@ class DashboardAggregator {
 
   async getReportsData(headers) {
     try {
-      const metrics = await reportService.getMetrics(headers);
+      const metrics = await reportService.getReportMetrics(headers);
       
       return {
         metrics: metrics || {},

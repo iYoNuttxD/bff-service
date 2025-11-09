@@ -27,7 +27,7 @@ describe('Dashboard Aggregator', () => {
     deliveryService.getEntregas.mockResolvedValue({ data: [], total: 5 });
     rentalService.getAlugueis.mockResolvedValue({ data: [], total: 3 });
     notificationService.getNotifications.mockResolvedValue({ data: [], unreadCount: 2 });
-    reportService.getMetrics.mockResolvedValue({ totalRevenue: 1000 });
+    reportService.getReportMetrics.mockResolvedValue({ totalRevenue: 1000 });
 
     const result = await dashboardAggregator.getOverview({});
 
@@ -51,7 +51,7 @@ describe('Dashboard Aggregator', () => {
     deliveryService.getEntregas.mockResolvedValue({ data: [], total: 5 });
     rentalService.getAlugueis.mockResolvedValue({ data: [], total: 3 });
     notificationService.getNotifications.mockResolvedValue({ data: [], unreadCount: 2 });
-    reportService.getMetrics.mockResolvedValue({ totalRevenue: 1000 });
+    reportService.getReportMetrics.mockResolvedValue({ totalRevenue: 1000 });
 
     const result = await dashboardAggregator.getOverview({});
 
@@ -69,7 +69,7 @@ describe('Dashboard Aggregator', () => {
     deliveryService.getEntregas.mockRejectedValue(new Error('Service down'));
     rentalService.getAlugueis.mockRejectedValue(new Error('Service down'));
     notificationService.getNotifications.mockRejectedValue(new Error('Service down'));
-    reportService.getMetrics.mockRejectedValue(new Error('Service down'));
+    reportService.getReportMetrics.mockRejectedValue(new Error('Service down'));
 
     const result = await dashboardAggregator.getOverview({});
 

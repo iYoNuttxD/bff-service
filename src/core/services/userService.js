@@ -10,6 +10,30 @@ class UserService {
     );
   }
 
+  async register(data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.post(servicesConfig.userService.endpoints.register, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error registering user', { error: error.message });
+      throw error;
+    }
+  }
+
+  async login(data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.post(servicesConfig.userService.endpoints.login, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error logging in user', { error: error.message });
+      throw error;
+    }
+  }
+
   async getUsers(headers = {}, params = {}) {
     try {
       const propagatedHeaders = this.client.propagateHeaders(headers);
@@ -38,11 +62,35 @@ class UserService {
   async getUserProfile(headers = {}) {
     try {
       const propagatedHeaders = this.client.propagateHeaders(headers);
-      return await this.client.get(servicesConfig.userService.endpoints.profile, {
+      return await this.client.get(servicesConfig.userService.endpoints.me, {
         headers: propagatedHeaders
       });
     } catch (error) {
       logger.error('Error fetching user profile', { error: error.message });
+      throw error;
+    }
+  }
+
+  async updateMe(data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.put(servicesConfig.userService.endpoints.me, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error updating user profile', { error: error.message });
+      throw error;
+    }
+  }
+
+  async updatePassword(data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.put(servicesConfig.userService.endpoints.password, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error updating user password', { error: error.message });
       throw error;
     }
   }
@@ -80,6 +128,18 @@ class UserService {
     } catch (error) {
       logger.error('Error deleting user', { id, error: error.message });
       throw error;
+    }
+  }
+
+  async getMetrics(headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(servicesConfig.userService.endpoints.metrics, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error fetching user service metrics', { error: error.message });
+      return null;
     }
   }
 

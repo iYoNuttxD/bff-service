@@ -88,6 +88,58 @@ class DeliveryService {
     }
   }
 
+  // Aluguéis
+  async getAlugueis(headers = {}, params = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(servicesConfig.deliveryService.endpoints.alugueis, {
+        headers: propagatedHeaders,
+        params
+      });
+    } catch (error) {
+      logger.error('Error fetching alugueis', { error: error.message });
+      throw error;
+    }
+  }
+
+  // Tracking
+  async getTrackingDeliveries(headers = {}, params = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(servicesConfig.deliveryService.endpoints.tracking, {
+        headers: propagatedHeaders,
+        params
+      });
+    } catch (error) {
+      logger.error('Error fetching tracking deliveries', { error: error.message });
+      throw error;
+    }
+  }
+
+  async getTrackingDeliveryById(deliveryId, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(`${servicesConfig.deliveryService.endpoints.tracking}/${deliveryId}`, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error fetching tracking delivery by ID', { deliveryId, error: error.message });
+      throw error;
+    }
+  }
+
+  async getMetrics(headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(servicesConfig.deliveryService.endpoints.metrics, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error fetching delivery service metrics', { error: error.message });
+      return null;
+    }
+  }
+
   async checkHealth() {
     try {
       return await this.client.get(servicesConfig.deliveryService.endpoints.health);
@@ -106,17 +158,20 @@ class DeliveryService {
         params
       };
 
+      // Prepend /api/v1 if path doesn't start with it
+      const fullPath = path.startsWith('/api/v1') ? path : `/api/v1${path}`;
+
       switch (method.toLowerCase()) {
         case 'get':
-          return await this.client.get(path, config);
+          return await this.client.get(fullPath, config);
         case 'post':
-          return await this.client.post(path, data, config);
+          return await this.client.post(fullPath, data, config);
         case 'put':
-          return await this.client.put(path, data, config);
+          return await this.client.put(fullPath, data, config);
         case 'patch':
-          return await this.client.patch(path, data, config);
+          return await this.client.patch(fullPath, data, config);
         case 'delete':
-          return await this.client.delete(path, config);
+          return await this.client.delete(fullPath, config);
         default:
           throw new Error(`Unsupported method: ${method}`);
       }

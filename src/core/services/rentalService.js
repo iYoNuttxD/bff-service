@@ -10,53 +10,118 @@ class RentalService {
     );
   }
 
-  async getAlugueis(headers = {}, params = {}) {
+  async getRentals(headers = {}, params = {}) {
     try {
       const propagatedHeaders = this.client.propagateHeaders(headers);
-      return await this.client.get(servicesConfig.rentalService.endpoints.alugueis, {
+      return await this.client.get(servicesConfig.rentalService.endpoints.rentals, {
         headers: propagatedHeaders,
         params
       });
     } catch (error) {
-      logger.error('Error fetching alugueis', { error: error.message });
+      logger.error('Error fetching rentals', { error: error.message });
       throw error;
     }
+  }
+
+  async getRentalById(id, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(`${servicesConfig.rentalService.endpoints.rentals}/${id}`, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error fetching rental by ID', { id, error: error.message });
+      throw error;
+    }
+  }
+
+  async createRental(data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.post(servicesConfig.rentalService.endpoints.rentals, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error creating rental', { error: error.message });
+      throw error;
+    }
+  }
+
+  async renewRental(id, data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.post(`${servicesConfig.rentalService.endpoints.rentals}/${id}/renew`, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error renewing rental', { id, error: error.message });
+      throw error;
+    }
+  }
+
+  async endRental(id, data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.post(`${servicesConfig.rentalService.endpoints.rentals}/${id}/end`, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error ending rental', { id, error: error.message });
+      throw error;
+    }
+  }
+
+  async returnRental(id, data, headers = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.post(`${servicesConfig.rentalService.endpoints.rentals}/${id}/return`, data, {
+        headers: propagatedHeaders
+      });
+    } catch (error) {
+      logger.error('Error returning rental', { id, error: error.message });
+      throw error;
+    }
+  }
+
+  async getVehiclesAvailability(headers = {}, params = {}) {
+    try {
+      const propagatedHeaders = this.client.propagateHeaders(headers);
+      return await this.client.get(servicesConfig.rentalService.endpoints.vehicles, {
+        headers: propagatedHeaders,
+        params
+      });
+    } catch (error) {
+      logger.error('Error fetching vehicles availability', { error: error.message });
+      throw error;
+    }
+  }
+
+  // Legacy methods for backward compatibility
+  async getAlugueis(headers = {}, params = {}) {
+    return this.getRentals(headers, params);
   }
 
   async getAluguelById(id, headers = {}) {
-    try {
-      const propagatedHeaders = this.client.propagateHeaders(headers);
-      return await this.client.get(`${servicesConfig.rentalService.endpoints.alugueis}/${id}`, {
-        headers: propagatedHeaders
-      });
-    } catch (error) {
-      logger.error('Error fetching aluguel by ID', { id, error: error.message });
-      throw error;
-    }
+    return this.getRentalById(id, headers);
   }
 
   async createAluguel(data, headers = {}) {
-    try {
-      const propagatedHeaders = this.client.propagateHeaders(headers);
-      return await this.client.post(servicesConfig.rentalService.endpoints.alugueis, data, {
-        headers: propagatedHeaders
-      });
-    } catch (error) {
-      logger.error('Error creating aluguel', { error: error.message });
-      throw error;
-    }
+    return this.createRental(data, headers);
   }
 
   async getVeiculos(headers = {}, params = {}) {
+    return this.getVehiclesAvailability(headers, params);
+  }
+
+  async getMetrics(headers = {}) {
     try {
       const propagatedHeaders = this.client.propagateHeaders(headers);
-      return await this.client.get(servicesConfig.rentalService.endpoints.veiculos, {
-        headers: propagatedHeaders,
-        params
+      return await this.client.get(servicesConfig.rentalService.endpoints.metrics, {
+        headers: propagatedHeaders
       });
     } catch (error) {
-      logger.error('Error fetching rental veiculos', { error: error.message });
-      throw error;
+      logger.error('Error fetching rental service metrics', { error: error.message });
+      return null;
     }
   }
 
@@ -77,17 +142,20 @@ class RentalService {
         params
       };
 
+      // Prepend /api/v1 if path doesn't start with it
+      const fullPath = path.startsWith('/api/v1') ? path : `/api/v1${path}`;
+
       switch (method.toLowerCase()) {
         case 'get':
-          return await this.client.get(path, config);
+          return await this.client.get(fullPath, config);
         case 'post':
-          return await this.client.post(path, data, config);
+          return await this.client.post(fullPath, data, config);
         case 'put':
-          return await this.client.put(path, data, config);
+          return await this.client.put(fullPath, data, config);
         case 'patch':
-          return await this.client.patch(path, data, config);
+          return await this.client.patch(fullPath, data, config);
         case 'delete':
-          return await this.client.delete(path, config);
+          return await this.client.delete(fullPath, config);
         default:
           throw new Error(`Unsupported method: ${method}`);
       }
