@@ -7,9 +7,8 @@
 
 **Backend For Frontend (BFF)** - Camada unificada de API Gateway e agregação da plataforma ClickDelivery, fornecendo uma interface única e estável entre o frontend e todos os microsserviços.
 
-Desenvolvido por: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
-Imagem oficial no Docker Hub: **[https://hub.docker.com/r/iyonuttxd/bff-service](https://hub.docker.com/r/iyonuttxd/bff-service)**
-
+Autor: **[@iYoNuttxD](https://github.com/iYoNuttxD)**  
+Imagem Docker: **[iyonuttxd/bff-service (Docker Hub)](https://hub.docker.com/r/iyonuttxd/bff-service)**
 ---
 
 ## 🎯 Visão Geral
