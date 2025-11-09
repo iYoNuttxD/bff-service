@@ -77,7 +77,7 @@ module.exports = {
     timeout: DEFAULT_TIMEOUT,
     endpoints: {
       alugueis: '/api/v1/rentals',
-      veiculos: '/api/v1/vehicles',
+      veiculos: '/api/v1/vehicles/availability',
       health: '/api/v1/health'
     }
   },
@@ -91,7 +91,7 @@ module.exports = {
     timeout: DEFAULT_TIMEOUT,
     endpoints: {
       notifications: '/api/v1/notifications',
-      send: '/api/v1/notifications/send',
+      send: '/api/v1/notifications',
       health: '/api/v1/health'
     }
   },
@@ -110,3 +110,4 @@ module.exports = {
     }
   }
 };
+
