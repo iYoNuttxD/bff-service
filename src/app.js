@@ -1,110 +1,141 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const helmet = require('helmet');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const path = require('path');
+const config = require('./config');
+const logger = require('./infra/logger/logger');
+const { jwtErrorHandler } = require('./infra/auth/jwtMiddleware');
 
 const app = express();
 
 // ========================================
 // MIDDLEWARES
 // ========================================
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware de log (se existir)
-const logger = require('./utils/logger');
+// Request logging with correlation ID
 app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.path}`);
+  const correlationId = req.headers['x-correlation-id'] || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  req.headers['x-correlation-id'] = correlationId;
+  res.setHeader('x-correlation-id', correlationId);
+  
+  logger.info('Incoming request', {
+    method: req.method,
+    path: req.path,
+    correlationId
+  });
+  
   next();
 });
 
-// Error handler middleware
-const errorHandler = require('./middlewares/errorHandler');
+// ========================================
+// SWAGGER DOCUMENTATION
+// ========================================
+try {
+  const swaggerDocument = YAML.load(path.join(__dirname, '../openapi.yaml'));
+  app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+} catch (error) {
+  logger.warn('Failed to load OpenAPI documentation', { error: error.message });
+}
 
 // ========================================
-// IMPORTAR ROTAS
+// IMPORT ROUTES
 // ========================================
-const ordersRoutes = require('./routes/orders.routes');
-const deliveryRoutes = require('./routes/delivery.routes');
-const eventsRoutes = require('./routes/events.routes');
-const aggregationRoutes = require('./routes/aggregation.routes');
+const healthRoutes = require('./api/routes/health.routes');
+const dashboardRoutes = require('./api/routes/dashboard.routes');
+const usersRoutes = require('./api/routes/users.routes');
+const ordersRoutes = require('./api/routes/orders.routes');
+const deliveriesRoutes = require('./api/routes/deliveries.routes');
+const rentalsRoutes = require('./api/routes/rentals.routes');
+const notificationsRoutes = require('./api/routes/notifications.routes');
+const reportsRoutes = require('./api/routes/reports.routes');
 
 // ========================================
-// REGISTRAR ROTAS
+// REGISTER ROUTES
 // ========================================
-app.use('/api/orders', ordersRoutes);
-app.use('/api/delivery', deliveryRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/aggregation', aggregationRoutes);
+app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/me', dashboardRoutes); // /me/summary endpoint
+app.use('/api/v1/users', usersRoutes);
+app.use('/api/v1/orders', ordersRoutes);
+app.use('/api/v1/deliveries', deliveriesRoutes);
+app.use('/api/v1/rentals', rentalsRoutes);
+app.use('/api/v1/notifications', notificationsRoutes);
+app.use('/api/v1/reports', reportsRoutes);
 
 // ========================================
-// ROTA DE HEALTH CHECK
-// ========================================
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'BFF Service is running',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    services: {
-      orders: process.env.ORDERS_SERVICE_URL || 'not configured',
-      delivery: process.env.DELIVERY_SERVICE_URL || 'not configured',
-      azureFunctions: {
-        createEvent: process.env.AZURE_FUNCTION_CREATE_EVENT || 'not configured',
-        getData: process.env.AZURE_FUNCTION_GET_DATA || 'not configured'
-      }
-    }
-  });
-});
-
-// ========================================
-// ROTA RAIZ
+// ROOT ENDPOINT
 // ========================================
 app.get('/', (req, res) => {
   res.json({
-    message: 'BFF Service - ERP Builders',
-    version: '1.0.0',
+    service: 'bff-service',
+    version: '2.0.0',
+    description: 'Backend For Frontend - ClickDelivery Platform',
     author: '@iYoNuttxD',
-    documentation: '/api-docs',
+    documentation: '/api/v1/api-docs',
     endpoints: {
-      orders: '/api/orders',
-      delivery: '/api/delivery',
-      events: '/api/events',
-      aggregation: '/api/aggregation',
-      health: '/health'
+      health: '/api/v1/health',
+      dashboard: '/api/v1/dashboard/overview',
+      userSummary: '/api/v1/me/summary',
+      users: '/api/v1/users',
+      orders: '/api/v1/orders',
+      deliveries: '/api/v1/deliveries',
+      rentals: '/api/v1/rentals',
+      notifications: '/api/v1/notifications',
+      reports: '/api/v1/reports'
+    },
+    microservices: {
+      user: config.services.user.baseURL,
+      orders: config.services.orders.baseURL,
+      delivery: config.services.delivery.baseURL,
+      rental: config.services.rental.baseURL,
+      notification: config.services.notification.baseURL,
+      report: config.services.report.baseURL
     }
   });
 });
 
-// ========================================
-// ERROR HANDLER (deve ser o último)
-// ========================================
-app.use(errorHandler);
+// Backward compatibility route
+app.get('/health', (req, res) => {
+  res.redirect(301, '/api/v1/health');
+});
 
 // ========================================
-// INICIAR SERVIDOR
+// ERROR HANDLERS
 // ========================================
-const PORT = process.env.PORT || 3000;
+app.use(jwtErrorHandler);
 
-app.listen(PORT, () => {
-  console.log('╔════════════════════════════════════════╗');
-  console.log('║   🚀 BFF SERVICE RODANDO               ║');
-  console.log('╠════════════════════════════════════════╣');
-  console.log(`║   📡 Porta: ${PORT}                       ║`);
-  console.log(`║   🌍 http://localhost:${PORT}             ║`);
-  console.log('╠════════════════════════════════════════╣');
-  console.log('║   📋 Endpoints Disponíveis:            ║');
-  console.log('║   • GET  /                             ║');
-  console.log('║   • GET  /health                       ║');
-  console.log('║   • *    /api/orders                   ║');
-  console.log('║   • *    /api/delivery                 ║');
-  console.log('║   • *    /api/events                   ║');
-  console.log('║   • *    /api/aggregation              ║');
-  console.log('╚════════════════════════════════════════╝');
-  console.log('');
-  console.log('🔗 Azure Functions:');
-  console.log(`   • CreateEvent: ${process.env.AZURE_FUNCTION_CREATE_EVENT || '❌ Não configurado'}`);
-  console.log(`   • GetData: ${process.env.AZURE_FUNCTION_GET_DATA || '❌ Não configurado'}`);
+// Global error handler
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error', {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    correlationId: req.headers['x-correlation-id']
+  });
+
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    error: err.message || 'Internal server error',
+    correlationId: req.headers['x-correlation-id'],
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Endpoint not found',
+    path: req.path,
+    timestamp: new Date().toISOString()
+  });
 });
 
 module.exports = app;
