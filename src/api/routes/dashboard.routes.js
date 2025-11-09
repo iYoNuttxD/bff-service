@@ -31,7 +31,7 @@ router.get('/overview', jwtMiddleware, bffController.asyncHandler(async (req, re
 }));
 
 // GET /api/v1/me/summary - Customer summary with aggregated counts
-router.get('/me/summary', jwtMiddleware, bffController.asyncHandler(async (req, res) => {
+router.get('/summary', jwtMiddleware, bffController.asyncHandler(async (req, res) => {
   const user = bffController.getUserFromToken(req);
   const userId = user?.sub || 'anonymous';
 
