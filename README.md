@@ -11,6 +11,11 @@ Autor: **[@iYoNuttxD](https://github.com/iYoNuttxD)**
 Imagem Docker: **[iyonuttxd/bff-service (Docker Hub)](https://hub.docker.com/r/iyonuttxd/bff-service)**
 ---
 
+# Feito Por
+
+Daniel Ganz Musse, João Vitor de Souza Hernandes, Flavio Augusto da Cruz Melo, Matheus 
+Lowen, Enrico Malho Bozza 
+
 ## 🎯 Visão Geral
 
 O serviço BFF atua como a principal fachada da plataforma ClickDelivery, orquestrando chamadas para múltiplos microsserviços, agregando dados e fornecendo uma API consistente para as aplicações frontend.
