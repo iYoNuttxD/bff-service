@@ -37,7 +37,8 @@ module.exports = {
     jwksUri: process.env.AUTH_JWKS_URI,
     issuer: process.env.AUTH_ISSUER,
     audience: process.env.AUTH_AUDIENCE,
-    required: process.env.AUTH_JWT_REQUIRED === 'true'
+    required: process.env.AUTH_JWT_REQUIRED === 'true',
+    secret: process.env.AUTH_JWT_SECRET
   },
   
   opa: {
