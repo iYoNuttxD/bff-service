@@ -253,7 +253,7 @@ paths:
     post:
       tags: [Users]
       summary: Register a new user
-      description: Proxies to User Service: POST /users/register
+      description: Proxies to User Service - POST /users/register
       requestBody:
         required: true
         content:
@@ -274,7 +274,7 @@ paths:
     post:
       tags: [Users]
       summary: Login
-      description: Proxies to User Service: POST /users/login
+      description: Proxies to User Service - POST /users/login
       requestBody:
         required: true
         content:
@@ -293,7 +293,7 @@ paths:
     get:
       tags: [Users]
       summary: Get current user profile
-      description: Proxies to User Service: GET /users/me
+      description: Proxies to User Service - GET /users/me
       security:
         - bearerAuth: []
       responses:
@@ -305,7 +305,7 @@ paths:
     put:
       tags: [Users]
       summary: Update current user profile
-      description: Proxies to User Service: PUT /users/me
+      description: Proxies to User Service - PUT /users/me
       security:
         - bearerAuth: []
       requestBody:
@@ -326,7 +326,7 @@ paths:
     put:
       tags: [Users]
       summary: Change current user password
-      description: Proxies to User Service: PUT /users/me/password
+      description: Proxies to User Service - PUT /users/me/password
       security:
         - bearerAuth: []
       requestBody:
@@ -351,18 +351,18 @@ paths:
       description: |
         Forwards GET requests to **Orders Service** (delivery-service-api).
 
-        Base: `https://delivery-service-api.azurewebsites.net/api/v1`
+        Base: https://delivery-service-api.azurewebsites.net/api/v1
 
         Supported target endpoints include:
-        - `/health`
-        - `/metrics`
-        - `/clientes`, `/clientes/{id}`
-        - `/restaurantes`, `/restaurantes/{id}`, `/restaurantes/categoria/{categoria}`
-        - `/cardapios`, `/cardapios/{id}`, `/cardapios/restaurante/{restauranteId}`, `/cardapios/{id}/disponibilidade`
-        - `/pedidos`, `/pedidos/{id}`, `/pedidos/dashboard`, `/pedidos/{id}/status`, `/pedidos/{id}/cancelar`
-        - `/avaliacoes`, `/avaliacoes/{id}`, `/avaliacoes/restaurante/{restauranteId}/media`
-        - `/pagamentos`, `/pagamentos/{id}`, `/pagamentos/pedido/{pedidoId}`,
-          `/pagamentos/{id}/status`, `/pagamentos/{id}/processar`, `/pagamentos/{id}/cancelar`
+        - /health
+        - /metrics
+        - /clientes, /clientes/{id}
+        - /restaurantes, /restaurantes/{id}, /restaurantes/categoria/{categoria}
+        - /cardapios, /cardapios/{id}, /cardapios/restaurante/{restauranteId}, /cardapios/{id}/disponibilidade
+        - /pedidos, /pedidos/{id}, /pedidos/dashboard, /pedidos/{id}/status, /pedidos/{id}/cancelar
+        - /avaliacoes, /avaliacoes/{id}, /avaliacoes/restaurante/{restauranteId}/media
+        - /pagamentos, /pagamentos/{id}, /pagamentos/pedido/{pedidoId},
+          /pagamentos/{id}/status, /pagamentos/{id}/processar, /pagamentos/{id}/cancelar
       security:
         - bearerAuth: []
       parameters:
@@ -427,16 +427,16 @@ paths:
       description: |
         Forwards GET requests to **Delivery Service**.
 
-        Base: `https://delivery-service-microservice.azurewebsites.net/api/v1`
+        Base: https://delivery-service-microservice.azurewebsites.net/api/v1
 
         Supported target endpoints include:
-        - `/health`, `/metrics`
-        - `/tracking/deliveries`, `/tracking/deliveries/{deliveryId}`
-        - `/tracking/drivers/{driverId}/deliveries`
-        - `/entregadores`, `/entregadores/{id}`
-        - `/veiculos`, `/veiculos/{id}`
-        - `/alugueis`, `/alugueis/{id}`
-        - `/entregas`, `/entregas/{id}`
+        - /health, /metrics
+        - /tracking/deliveries, /tracking/deliveries/{deliveryId}
+        - /tracking/drivers/{driverId}/deliveries
+        - /entregadores, /entregadores/{id}
+        - /veiculos, /veiculos/{id}
+        - /alugueis, /alugueis/{id}
+        - /entregas, /entregas/{id}
       security:
         - bearerAuth: []
       parameters:
@@ -500,12 +500,12 @@ paths:
       description: |
         Forwards GET requests to **Rental Service**.
 
-        Base: `https://clickdelivery-rental-service.azurewebsites.net/api/v1`
+        Base: https://clickdelivery-rental-service.azurewebsites.net/api/v1
 
         Supported target endpoints include:
-        - `/health`, `/metrics`
-        - `/rentals`, `/rentals/{id}`
-        - `/vehicles/availability`
+        - /health, /metrics
+        - /rentals, /rentals/{id}
+        - /vehicles/availability
       security:
         - bearerAuth: []
       parameters:
@@ -522,7 +522,7 @@ paths:
     post:
       tags: [Rentals]
       summary: Proxy POST to Rental Service
-      description: Proxies to `/rentals`, `/rentals/{id}/renew`, `/rentals/{id}/end`, `/rentals/{id}/return` when applicable.
+      description: Proxies to /rentals, /rentals/{id}/renew, /rentals/{id}/end, /rentals/{id}/return when applicable.
       security:
         - bearerAuth: []
       parameters:
@@ -549,12 +549,12 @@ paths:
       description: |
         Forwards GET requests to **Notification Service**.
 
-        Base: `https://clickdelivery-notification-service.azurewebsites.net/api/v1`
+        Base: https://clickdelivery-notification-service.azurewebsites.net/api/v1
 
         Supported target endpoints include:
-        - `/health`, `/metrics`
-        - `/notifications`, `/notifications/{id}`
-        - `/preferences/{userId}`
+        - /health, /metrics
+        - /notifications, /notifications/{id}
+        - /preferences/{userId}
       security:
         - bearerAuth: []
       parameters:
@@ -571,7 +571,7 @@ paths:
     post:
       tags: [Notifications]
       summary: Proxy POST to Notification Service
-      description: Proxies to `/notifications` to create notifications.
+      description: Proxies to /notifications to create notifications.
       security:
         - bearerAuth: []
       parameters:
@@ -593,7 +593,7 @@ paths:
     delete:
       tags: [Notifications]
       summary: Proxy DELETE to Notification Service
-      description: Proxies to `/notifications/user/{userId}` for GDPR/LGPD deletion.
+      description: Proxies to /notifications/user/{userId} for GDPR/LGPD deletion.
       security:
         - bearerAuth: []
       parameters:
@@ -614,14 +614,14 @@ paths:
       description: |
         Forwards GET requests to **Report Service**.
 
-        Base: `https://clickdelivery-report-service.azurewebsites.net/api/v1`
+        Base: https://clickdelivery-report-service.azurewebsites.net/api/v1
 
         Supported target endpoints include:
-        - `/reports`
-        - `/reports/{id}`
-        - `/reports/metrics`
-        - `/health`
-        - `/metrics`
+        - /reports
+        - /reports/{id}
+        - /reports/metrics
+        - /health
+        - /metrics
       security:
         - bearerAuth: []
       parameters:
